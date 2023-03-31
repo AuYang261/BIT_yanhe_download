@@ -21,7 +21,7 @@ if __name__ == '__main__':
 	for i, c in enumerate(videoList):
 		print(i, c['title'])
 
-	index = eval(input('select:'))
+	index = eval('[' + input('select:') + ']')
 	vga = input('vga?(vga/null):')
 	for i in index:
 		c = videoList[i]

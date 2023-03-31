@@ -8,7 +8,7 @@
 git clone https://github.com/AuYang261/BIT_yanghe_download.git
 ```
 
-在[延河课堂 (yanhekt.cn)](https://www.yanhekt.cn/recordCourse)中找到想下载的课程，以链接为https://www.yanhekt.cn/course/39134的课程为例，复制地址栏最后的编号39134。
+在[延河课堂 (yanhekt.cn)](https://www.yanhekt.cn/recordCourse)中找到想下载的课程，以链接为https://www.yanhekt.cn/course/39134 的课程为例，复制地址栏最后的编号39134。
 
 在仓库目录下执行命令，将39134替换为想下载的课程编号：
 

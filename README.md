@@ -1,5 +1,13 @@
 # BIT_yanghe_download
 
+ ## 依赖
+ 
+ * python第三方库： 
+ ```
+ requests、execjs
+ ```
+ * ffmpeg
+
  ## 下载指定课程
 
 打开命令行，使用如下指令将仓库克隆到本地：

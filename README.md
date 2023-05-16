@@ -1,4 +1,12 @@
-# BIT_yanghe_download
+# BIT_yanhe_download
+
+ ## 依赖
+ 
+ * python第三方库： 
+ ```
+ requests、execjs
+ ```
+ * [ffmpeg](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip)，下载后解压，并将bin/文件夹添加到环境变量，以确保输入命令``` ffmpeg ```能输出版本信息
 
  ## 下载指定课程
 

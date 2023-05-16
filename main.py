@@ -28,8 +28,8 @@ if __name__ == '__main__':
 		name = course.json()['data']['name_zh'] + '-' + course.json()['data']['professors'][0]['name'] + '-' + c['title']
 		print(name)
 		if vga == "2":
-			m3u8dl.M3u8Download(c['videos'][0]['vga'], course.json()['data']['name_zh'] + ('-vga' if vga == 'vga' else '-video'), name)
+			m3u8dl.M3u8Download(c['videos'][0]['vga'], course.json()['data']['name_zh'] + ('-vga' if vga == '2' else '-video'), name)
 		else:
-			m3u8dl.M3u8Download(c['videos'][0]['main'], course.json()['data']['name_zh'] + ('-vga' if vga == 'vga' else '-video'), name)
+			m3u8dl.M3u8Download(c['videos'][0]['main'], course.json()['data']['name_zh'] + ('-vga' if vga == '2' else '-video'), name)
 
 

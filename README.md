@@ -1,26 +1,5 @@
 # BIT_yanhe_download
 
- ## 依赖
-
-* python，[下载](https://www.python.org/ftp/python/3.9.4/python-3.9.4-amd64.exe)并安装
-
-* python第三方库requests、execjs。双击运行项目根目录下的`install.bat`一键安装。
-
-     或手动安装：打开命令行（按win+r，在打开的窗口中输入cmd，回车），运行如下命令以安装： 
-
-     ```bash
-     pip install requests
-     pip install PyExecJS
-     ```
-
-* [ffmpeg](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip)（*已默认将其放到项目根目录，故可忽略本步*），下载后解压，并将bin/文件夹添加到环境变量（教程：[win10系统如何添加环境变量](https://blog.csdn.net/qq_42535133/article/details/105373924)），以确保输入命令``` ffmpeg ```能输出版本信息。打开命令行，输入如下命令，若输出版本信息而无报错，则设置正确。
-
-    ```bash
-	ffmpeg.exe -version
-	```
-
-
-
  ## 下载指定课程
 
 [下载并解压](https://github.com/AuYang261/BIT_yanhe_download/releases/download/v1.1/yanhe.zip)。
@@ -39,7 +18,31 @@
 
 ![image-20230926124922726](md/README/image-20230926124922726.png)
 
+ ## 依赖
+
+*若想用python环境运行，需安装这些依赖*
+
+* python，[下载](https://www.python.org/ftp/python/3.9.4/python-3.9.4-amd64.exe)并安装
+
+* python第三方库requests、execjs。双击运行项目根目录下的`install.bat`一键安装。
+
+  或手动安装：打开命令行（按win+r，在打开的窗口中输入cmd，回车），运行如下命令以安装： 
+
+  ```bash
+  pip install requests
+  pip install PyExecJS
+  ```
+
 ## 注意
 
 * 需要关闭本机上的代理，否则会提示类似`ValueError: check_hostname requires server_hostname`的报错信息。
+
 * 可以下载无权限的课程，只要知道课程链接（中的课程编号）就行。
+
+* 使用如下命令打包;
+
+  ```bash
+  Pyinstaller -F main.py
+  ```
+
+  

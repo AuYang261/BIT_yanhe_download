@@ -2,37 +2,32 @@
 
  ## 依赖
 
- * python第三方库requests、execjs。打开命令行（按win+r，在打开的窗口中输入cmd，回车），运行如下命令以安装： 
+* python，[下载](https://www.python.org/ftp/python/3.9.4/python-3.9.4-amd64.exe)并安装
+
+* python第三方库requests、execjs。双击运行项目根目录下的`install.bat`一键安装。
+
+     或手动安装：打开命令行（按win+r，在打开的窗口中输入cmd，回车），运行如下命令以安装： 
 
      ```bash
      pip install requests
      pip install PyExecJS
      ```
- * [ffmpeg](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip)，下载后解压，并将bin/文件夹添加到环境变量（教程：[win10系统如何添加环境变量](https://blog.csdn.net/qq_42535133/article/details/105373924)），以确保输入命令``` ffmpeg ```能输出版本信息。打开命令行，输入如下命令，若输出版本信息而无报错，则设置正确。
+
+* [ffmpeg](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip)（*已默认将其放到项目根目录，故可忽略本步*），下载后解压，并将bin/文件夹添加到环境变量（教程：[win10系统如何添加环境变量](https://blog.csdn.net/qq_42535133/article/details/105373924)），以确保输入命令``` ffmpeg ```能输出版本信息。打开命令行，输入如下命令，若输出版本信息而无报错，则设置正确。
 
     ```bash
-    ffmpeg.exe -version
-    ```
+	ffmpeg.exe -version
+	```
+
+
 
  ## 下载指定课程
 
-打开命令行，使用如下指令将仓库克隆到本地（若无git也可[下载压缩包](https://github.com/AuYang261/BIT_yanhe_download/archive/refs/heads/main.zip)并解压）：
-
-```bash
-git clone https://github.com/AuYang261/BIT_yanghe_download.git
-```
+[下载压缩包](https://github.com/AuYang261/BIT_yanhe_download/releases/download/v1.0/yanhe.zip)并解压。
 
 在[延河课堂 (yanhekt.cn)](https://www.yanhekt.cn/recordCourse)中找到想下载的课程，以链接为https://www.yanhekt.cn/course/40524 的课程为例，复制地址栏最后的编号40524。
 
-* 在仓库目录下执行命令，将40524替换为你想下载的课程编号：
-
-    ```bash
-    python main.py 40524
-    ```
-
-* 若不熟悉命令行操作，也可双击运行`run.bat`文件，并输入你想下载的课程编号(40524)。
-
-输出课程视频列表：
+双击运行`run.bat`文件，并输入你想下载的课程编号(40524)。输出课程视频列表：
 
 ![image-20230926124749421](md/README/image-20230926124749421.png)
 

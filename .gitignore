@@ -3,3 +3,6 @@ output/
 old/
 *.zip
 *.exe
+build/
+dist/
+*.spec

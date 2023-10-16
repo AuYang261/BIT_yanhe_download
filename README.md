@@ -23,7 +23,7 @@
 
  ## 下载指定课程
 
-[下载压缩包](https://github.com/AuYang261/BIT_yanhe_download/releases/download/v1.0/yanhe.zip)并解压。
+[下载并解压](https://github.com/AuYang261/BIT_yanhe_download/releases/download/v1.1/yanhe.zip)。
 
 在[延河课堂 (yanhekt.cn)](https://www.yanhekt.cn/recordCourse)中找到想下载的课程，以链接为https://www.yanhekt.cn/course/40524 的课程为例，复制地址栏最后的编号40524。
 

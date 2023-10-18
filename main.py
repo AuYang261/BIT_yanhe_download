@@ -11,14 +11,17 @@ headers={
 
 
 # courseID = 31425
-if __name__ == '__main__':
+def main():
     if len(sys.argv) == 1:
-        courseID = eval(input('Please input course id: '))
+        courseID = eval(input('Please input course ID: '))
     else:
         courseID = sys.argv[1]
 
     course = requests.get(f'https://cbiz.yanhekt.cn/v1/course?id={courseID}&with_professor_badges=true', headers=headers)
     req = requests.get(f'https://cbiz.yanhekt.cn/v2/course/session/list?course_id={courseID}', headers=headers)
+    if course.json()['code'] != '0':
+        print(course.json()['message'])
+        raise Exception("Please Check your course ID, note that it should be started with yanhekt.cn/course/***, not yanhekt.cn/session/***")
     print(course.json()['data']['name_zh'])
     videoList = req.json()['data']
     # print(json.dumps(videoList, indent=2))
@@ -41,3 +44,10 @@ if __name__ == '__main__':
             m3u8dl.M3u8Download(c['videos'][0]['main'], 'output/'+ course.json()['data']['name_zh'] + ('-screen' if vga == '2' else '-video'), name)
 
 
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception as e:
+        print(e)
+        print("If the problem is still not solved, you can report an issue in https://github.com/AuYang261/BIT_yanhe_download/issues.")
+        print("Or contact with the author xu_jyang@163.com. Thanks for your report!")

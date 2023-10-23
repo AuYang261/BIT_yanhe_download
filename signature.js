@@ -7,8 +7,10 @@
  * @LastEditors  : GDDG08
  * @LastEditTime : 2022-11-07 11:16:50
  */
-global.navigator = { userAgent: 'node.js' };
-
+navigator={
+userAgent: 'node.js',
+appName: "Microsoft Internet Explorer",
+};
 function C() {
     function e(e, t, n, a) {
         return T(n - 281, t)

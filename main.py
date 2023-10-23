@@ -19,7 +19,8 @@ def main():
 
     course = requests.get(f'https://cbiz.yanhekt.cn/v1/course?id={courseID}&with_professor_badges=true', headers=headers)
     req = requests.get(f'https://cbiz.yanhekt.cn/v2/course/session/list?course_id={courseID}', headers=headers)
-    if course.json()['code'] != '0':
+    if course.json()['code'] != '0' and course.json()['code'] != 0:
+        print(course.json()['code'])
         print(course.json()['message'])
         raise Exception("Please Check your course ID, note that it should be started with yanhekt.cn/course/***, not yanhekt.cn/session/***")
     print(course.json()['data']['name_zh'])

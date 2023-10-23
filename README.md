@@ -38,13 +38,21 @@
 ## 注意
 
 * 需要关闭本机上的代理，否则会提示类似`check_hostname requires server_hostname`的报错信息。
-
 * 可以下载无权限的课程，只要知道课程链接（中的课程编号）就行。
+
+## 打包
 
 * 使用如下命令打包：
 
   ```bash
   Pyinstaller -F main.py
+  ```
+
+
+* `js_to_py.py`将获取签名的js代码转为python代码，运行如下命令进行转换：
+
+  ```bash
+  python js_to_py.py
   ```
 
   

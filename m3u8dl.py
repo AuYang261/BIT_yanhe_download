@@ -15,10 +15,10 @@ import base64
 import platform
 import requests
 import urllib3
-import execjs
 import time
 from concurrent.futures import ThreadPoolExecutor
 
+from signature_from_js import signature_from_js
 
 class ThreadPoolExecutorWithQueueSizeLimit(ThreadPoolExecutor):
     """
@@ -71,13 +71,7 @@ class M3u8Download:
 
         urllib3.disable_warnings()
 
-        js = ''
-        # with open(os.path.dirname(sys.argv[0])+"/signature.js", 'r', encoding='UTF-8') as f:
-        with open("./signature.js", 'r', encoding='UTF-8') as f:
-            js = f.read()
-        self._signJs = execjs.compile(js)
-
-        self._url=self._signJs.call("encryptURL",self._url)
+        self._url=signature_from_js.encryptURL(self._url)
 
         self.get_m3u8_info(self._url, self._num_retries)
         print('Downloading: %s' % self._name, 'Save path: %s' % self._file_path, sep='\n')
@@ -91,7 +85,7 @@ class M3u8Download:
 
     def getSignature(self):
         timestamp = str(int(time.time()))
-        signature = self._signJs.call('getSignature', timestamp)
+        signature = signature_from_js.getSignature(timestamp)
         # print(timestamp, signature)
         return timestamp, signature
 

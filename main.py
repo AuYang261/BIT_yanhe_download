@@ -39,10 +39,10 @@ def main():
         print(name)
         if vga == "2":
             print("Downloading screen...")
-            m3u8dl.M3u8Download(c['videos'][0]['vga'], 'output/' + course.json()['data']['name_zh'] + ('-screen' if vga == '2' else '-video'), name)
+            m3u8dl.M3u8Download(c['videos'][0]['vga'], 'output\\' + course.json()['data']['name_zh'] + ('-screen' if vga == '2' else '-video'), name)
         else:
             print("Downloading video...")
-            m3u8dl.M3u8Download(c['videos'][0]['main'], 'output/'+ course.json()['data']['name_zh'] + ('-screen' if vga == '2' else '-video'), name)
+            m3u8dl.M3u8Download(c['videos'][0]['main'], 'output\\'+ course.json()['data']['name_zh'] + ('-screen' if vga == '2' else '-video'), name)
 
 
 if __name__ == '__main__':

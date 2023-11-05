@@ -35,14 +35,14 @@ def main():
         os.mkdir('output/')
     for i in index:
         c = videoList[i]
-        name = course.json()['data']['name_zh'] + '-' + course.json()['data']['professors'][0]['name'] + '-' + c['title']
+        name = course.json()['data']['name_zh'].strip() + '-' + course.json()['data']['professors'][0]['name'] + '-' + c['title']
         print(name)
         if vga == "2":
             print("Downloading screen...")
-            m3u8dl.M3u8Download(c['videos'][0]['vga'], 'output\\' + course.json()['data']['name_zh'] + ('-screen' if vga == '2' else '-video'), name)
+            m3u8dl.M3u8Download(c['videos'][0]['vga'], 'output\\' + course.json()['data']['name_zh'].strip() + ('-screen' if vga == '2' else '-video'), name)
         else:
             print("Downloading video...")
-            m3u8dl.M3u8Download(c['videos'][0]['main'], 'output\\'+ course.json()['data']['name_zh'] + ('-screen' if vga == '2' else '-video'), name)
+            m3u8dl.M3u8Download(c['videos'][0]['main'], 'output\\'+ course.json()['data']['name_zh'].strip() + ('-screen' if vga == '2' else '-video'), name)
 
 
 if __name__ == '__main__':

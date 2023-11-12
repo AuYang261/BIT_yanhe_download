@@ -48,8 +48,8 @@ def main():
 
 if __name__ == '__main__':
     try:
-        # main()
-        cProfile.run('main()', 'profile.txt')
+        main()
+        # cProfile.run('main()', 'output/profile.txt')
     except Exception as e:
         print(e)
         print("If the problem is still not solved, you can report an issue in https://github.com/AuYang261/BIT_yanhe_download/issues.")

@@ -3,6 +3,7 @@ import m3u8dl
 import sys
 import json
 import os
+import cProfile
 headers={
     'Origin': 'https://www.yanhekt.cn',
     "xdomain-client": "web_user",
@@ -47,7 +48,8 @@ def main():
 
 if __name__ == '__main__':
     try:
-        main()
+        # main()
+        cProfile.run('main()', 'profile.txt')
     except Exception as e:
         print(e)
         print("If the problem is still not solved, you can report an issue in https://github.com/AuYang261/BIT_yanhe_download/issues.")

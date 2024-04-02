@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import requests
 import m3u8dl
 import sys
@@ -28,10 +30,10 @@ def main():
     videoList = req.json()['data']
     # print(json.dumps(videoList, indent=2))
     for i, c in enumerate(videoList):
-        print(i, c['title'])
+        print(i, ":", c['title'])
 
-    index = eval('[' + input('select(split by \',\'):') + ']')
-    vga = input('video(1) or screen(2)?(input 1 or 2, default 1):')
+    index = eval('[' + input('select(split by \',\', such as: 0,2,4):') + ']')
+    vga = input('video(1) or screen(2)?(input 1 or 2, default video):')
     if not os.path.exists('output/'):
         os.mkdir('output/')
     for i in index:
@@ -40,10 +42,10 @@ def main():
         print(name)
         if vga == "2":
             print("Downloading screen...")
-            m3u8dl.M3u8Download(c['videos'][0]['vga'], 'output\\' + course.json()['data']['name_zh'].strip() + ('-screen' if vga == '2' else '-video'), name)
+            m3u8dl.M3u8Download(c['videos'][0]['vga'], 'output/' + course.json()['data']['name_zh'].strip() + '-screen', name)
         else:
             print("Downloading video...")
-            m3u8dl.M3u8Download(c['videos'][0]['main'], 'output\\'+ course.json()['data']['name_zh'].strip() + ('-screen' if vga == '2' else '-video'), name)
+            m3u8dl.M3u8Download(c['videos'][0]['main'], 'output/'+ course.json()['data']['name_zh'].strip() + '-video', name)
 
 
 if __name__ == '__main__':
@@ -54,3 +56,5 @@ if __name__ == '__main__':
         print(e)
         print("If the problem is still not solved, you can report an issue in https://github.com/AuYang261/BIT_yanhe_download/issues.")
         print("Or contact with the author xu_jyang@163.com. Thanks for your report!")
+        print("如果问题仍未解决，您可以在https://github.com/AuYang261/BIT_yanhe_download/issues 中报告问题。")
+        print("或者联系作者xu_jyang@163.com。感谢您的报告！")

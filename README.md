@@ -1,6 +1,12 @@
 # BIT_yanhe_download
 
- ## 下载指定课程
+## 介绍
+
+本项目可下载[延河课堂 (yanhekt.cn)](https://www.yanhekt.cn/recordCourse)中的课程视频。延河课堂是北京理工大学的在线课堂，提供了大量的课程视频，但是没有提供下载功能。本项目可以下载指定课程的视频录像和屏幕信号，包括无权限的课程。
+
+欢迎提出建议和star！
+
+## 使用：下载指定课程
 
 [下载并解压](https://github.com/AuYang261/BIT_yanhe_download/releases/latest/download/yanhe.zip)。
 
@@ -8,7 +14,7 @@
 
 ![image-20231018204208066](md/README/image-20231018204208066.png)
 
-双击运行`main.exe`或`run.bat`文件，并输入你想下载的课程编号(40524)。输出课程视频列表：
+双击运行`main.exe`（Release中的）或`run.bat`文件，并输入你想下载的课程编号(40524)。输出课程视频列表：
 
 ![image-20230926124749421](md/README/image-20230926124749421.png)
 
@@ -20,19 +26,18 @@
 
 ![image-20230926124922726](md/README/image-20230926124922726.png)
 
- ## 依赖
+## 依赖
+
+* ffmpeg，已在Release中提供。
 
 *若想用python环境运行，需安装这些依赖*
 
 * python，[下载](https://www.python.org/ftp/python/3.9.4/python-3.9.4-amd64.exe)并安装
 
-* python第三方库requests、execjs。双击运行项目根目录下的`install.bat`一键安装。
-
-  或手动安装：打开命令行（按win+r，在打开的窗口中输入cmd，回车），运行如下命令以安装： 
+* python第三方库requests。打开命令行（按win+r，在打开的窗口中输入cmd，回车），运行如下命令安装：
 
   ```bash
-  pip install requests
-  pip install PyExecJS
+  pip install -r requirements.txt
   ```
 
 ## 注意
@@ -42,17 +47,10 @@
 
 ## 打包
 
-* 使用如下命令打包：
+如果想要运行时不依赖python环境，可将python程序打包成可执行文件。Release中已打包。
 
-  ```bash
-  Pyinstaller -F main.py
-  ```
+使用如下命令打包：
 
-
-* `js_to_py.py`将获取签名的js代码转为python代码，运行如下命令进行转换：
-
-  ```bash
-  python js_to_py.py
-  ```
-
-  
+```bash
+Pyinstaller -F main.py
+```

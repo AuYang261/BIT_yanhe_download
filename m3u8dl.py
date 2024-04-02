@@ -1,12 +1,5 @@
-'''
-Project      :
-FilePath     : \BIT-YANHE\m3u8dl.py
-Descripttion :
-Author       : GDDG08
-Date         : 2022-11-07 12:09:26
-LastEditors  : GDDG08
-LastEditTime : 2022-11-07 15:39:29
-'''
+# coding=utf-8
+
 import os
 import re
 import sys
@@ -18,7 +11,7 @@ import urllib3
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-from signature_from_js import signature_from_js
+from hashlib import md5
 
 class ThreadPoolExecutorWithQueueSizeLimit(ThreadPoolExecutor):
     """
@@ -67,18 +60,18 @@ class M3u8Download:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36 Edg/93.0.961.52',
             'Origin': 'https://www.yanhekt.cn',
             'referer': 'https://www.yanhekt.cn/',
-                         }
-        self.timestamp = str(int(time.time()))
-        self.signature = signature_from_js.getSignature(self.timestamp)
+        }
+        self.magic = "1tJrMwNq3h0yLgx86Rued2J1tFc"
+        self.updateSignature()
 
         urllib3.disable_warnings()
 
-        self._url=signature_from_js.encryptURL(self._url)
+        self._url=self.encryptURL(self._url)
 
         self.get_m3u8_info(self._url, self._num_retries)
         print('Downloading: %s' % self._name, 'Save path: %s' % self._file_path, sep='\n')
         with ThreadPoolExecutorWithQueueSizeLimit(self._max_workers) as pool:
-            pool.submit(self.updateSignature)
+            pool.submit(self.updateSignatureLoop)
             for k, ts_url in enumerate(self._ts_url_list):
                 pool.submit(self.download_ts, ts_url, os.path.join(self._file_path, str(k)), self._num_retries)
         if self._success_sum == self._ts_sum:
@@ -87,12 +80,19 @@ class M3u8Download:
             print(f"Download successfully --> {self._name}")
 
     def updateSignature(self):
+        self.timestamp = str(int(time.time()))
+        self.signature = md5((self.magic + "_v1_" + self.timestamp).encode()).hexdigest()
+
+    def updateSignatureLoop(self):
         while self._success_sum != self._ts_sum:
-            self.timestamp = str(int(time.time()))
-            self.signature = signature_from_js.getSignature(self.timestamp)
-            # print('Updated signature')
-            # print(timestamp, signature)
+            self.updateSignature()
             time.sleep(10)
+
+    def encryptURL(self, url):
+        url_list = url.split('/')
+        # "a97f12c055a10ee51d60e441e618bfef"
+        url_list.insert(-1, md5((self.magic + "_100").encode()).hexdigest())
+        return '/'.join(url_list)
 
     def getToken(self):
         if self._token == None:
@@ -228,7 +228,7 @@ class M3u8Download:
             print(e)
             if os.path.exists(os.path.join(self._file_path, 'key')):
                 os.remove(os.path.join(self._file_path, 'key'))
-            print("加密视频,无法加载key,揭秘失败")
+            print("加密视频,无法加载key,解密失败")
             if num_retries > 0:
                 self.download_key(key_line, num_retries - 1)
 

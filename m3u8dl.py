@@ -51,6 +51,9 @@ class M3u8Download:
         if not os.path.exists(os.path.join(os.getcwd(), self._workDir)):
             os.mkdir(os.path.join(os.getcwd(), self._workDir))
         self._file_path = os.path.join(os.getcwd(), self._workDir, self._name)
+        if os.path.exists(self._file_path + '.mp4'):
+            print(f"File '{self._file_path}.mp4' already exists, skip download")
+            return
         self._front_url = None
         self._ts_url_list = []
         self._success_sum = 0
@@ -248,22 +251,3 @@ class M3u8Download:
             os.remove(os.path.join(self._file_path, item))
         os.removedirs(self._file_path)
         os.remove(self._file_path + '.m3u8')
-
-
-if __name__ == "__main__":
-    # url_list = input("输入url，若同时输入多个url时要用空格分开：").split()
-    # name_list = input("输入name，若同时输入多个name要用空格分开：").split()
-    # # 如果M3U8_URL的数量 ≠ SAVE_NAME的数量
-    # # 下载一部电视剧时，只需要输入一个name就可以了
-    # sta = len(url_list) == len(name_list)
-    # for i, u in enumerate(url_list):
-    #     M3u8Download(u,
-    #                  name_list[i] if sta else f"{name_list[0]}{i + 1:02}",
-    #                  max_workers=64,
-    #                  num_retries=10,
-    #                  # base64_key='5N12sDHDVcx1Hqnagn4NJg=='
-    #                  )
-
-    M3u8Download(
-        # "https://cvideo.yanhekt.cn/vod-lxx/2022/11/01/13772680/1/VGA/a97f12c055a10ee51d60e441e618bfef/VGA.m3u8", "./", "test.mp4")
-        "https://cvideo.yanhekt.cn/vod-lxx/2022/11/01/13772680/1/VGA/VGA.m3u8", "./", "test.mp4")

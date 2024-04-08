@@ -1,1 +1,3 @@
 requests
+openai-whisper
+zhconv

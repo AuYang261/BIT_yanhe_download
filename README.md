@@ -28,7 +28,12 @@
 
 ## 依赖
 
-* ffmpeg，已在Release中提供。
+* ffmpeg，已在Release中提供。若在Linux环境下运行，需手动安装ffmpeg：
+
+```bash
+sudo apt update
+sudo apt install ffmpeg
+```
 
 *若想用python环境运行，需安装这些依赖*
 
@@ -37,7 +42,7 @@
 * python第三方库requests。打开命令行（按win+r，在打开的窗口中输入cmd，回车），运行如下命令安装：
 
   ```bash
-  pip install -r requirements.txt
+  pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
   ```
 
 ## 注意
@@ -52,5 +57,11 @@
 使用如下命令打包：
 
 ```bash
-Pyinstaller -F main.py
+# 若未安装pyinstaller，运行以下命令安装
+pip install pyinstaller
+# 打包
+pyinstaller -F main.py
 ```
+
+## 语音转文字
+

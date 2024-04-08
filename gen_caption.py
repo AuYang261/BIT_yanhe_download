@@ -1,7 +1,8 @@
 import whisper
 import time
 from zhconv import convert  # 简繁体转换
-# from moviepy.editor import VideoFileClip
+import sys
+import os
 
 
 def seconds_to_hmsm(seconds):
@@ -29,30 +30,28 @@ def seconds_to_hmsm(seconds):
 
 def main():
     # 视频文件路径
-    video_path = 'output/深度学习-video/深度学习-任雪梅-第4周 星期三 第4大节.mp4'
-    # 输出音频文件路径
-    # audio_output_path = 'output/audio.mp3'
+    if len(sys.argv) >= 2:
+        video_path = sys.argv[1]
+    else:
+        files = []
+        for dirpath, dirnames, filenames in os.walk('output/'):
+            for filename in filenames:
+                if filename.endswith('.mp4'):
+                    files.append(os.path.join(dirpath, filename))
+        for i, f in enumerate(files):
+            print(i, ":", f)
+        video_path = files[eval(input('select a video file by input a num: '))]
 
-    # # 加载视频文件
-    # video = VideoFileClip(video_path)
-
-    # # 30秒的音频
-    # audio = video.audio.subclip(60, 2*60)
-
-    # # 保存音频文件
-    # audio.write_audiofile(audio_output_path)
-
-    # # 释放资源
-    # video.close()
+    audio_path = video_path.replace("mp4", "m4a")
+    cmd = f"ffmpeg -i '{video_path}' -vn -ar {whisper.audio.SAMPLE_RATE} '{audio_path}'"
+    os.system(cmd)
 
     model = whisper.load_model("base", download_root="whisper_models/")
 
     start = time.time()
-    result = model.transcribe(video_path, verbose=False, language="zh")
+    result = model.transcribe(audio_path, verbose=False, language="zh")
     print("Time cost: ", time.time() - start)
 
-    for segment in result["segments"]:
-        print(segment["start"], segment["end"], segment["text"])
     # 写入字幕文件
     with open(video_path.replace("mp4", "srt"), 'w', encoding='utf-8') as f:
         i = 1
@@ -63,6 +62,9 @@ def main():
             i += 1
             f.write(convert(r['text'], 'zh-cn')+'\n')  # 结果可能是繁体，转为简体zh-cn
             f.write('\n')
+    
+    # 删除音频文件
+    os.remove(audio_path)
 
 
 if __name__ == '__main__':

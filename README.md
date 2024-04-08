@@ -26,6 +26,32 @@
 
 ![image-20230926124922726](md/README/image-20230926124922726.png)
 
+## 自动生成字幕
+
+本项目提供自动生成字幕功能，使用openai的[whisper](https://github.com/openai/whisper)项目及其模型在本地进行语音转文字生成字幕。
+
+最好使用GPU运行，否则速度较慢。
+
+由于涉及到的库较多，打包生成的可执行文件较大，目前暂不发布打包的可执行文件，需要python环境运行，配置python环境见下文依赖部分。
+
+运行gen_caption.py为指定视频生成字幕：
+
+```bash
+python gen_caption.py video_path
+```
+
+或输入数字选择视频：
+
+```bash
+python gen_caption.py
+```
+
+![2024-04-08_17-42](md/README/2024-04-08_17-42.png)
+
+等待程序运行完成，生成的字幕文件为`.srt`格式，与视频文件在同级目录下，用支持字幕的播放器打开视频即可看到带字幕的视频。
+
+tips: 生成字幕的时间较长，可以先观看视频，字幕生成好了再重新打开视频享受字幕。使用GPU大约需要几分钟，若无GPU则不建议使用本项目提供的字幕功能，可自行寻找其他生成字幕的工具。
+
 ## 依赖
 
 * ffmpeg，已在Release中提供。若在Linux环境下运行，需手动安装ffmpeg：
@@ -35,15 +61,22 @@ sudo apt update
 sudo apt install ffmpeg
 ```
 
-*若想用python环境运行，需安装这些依赖*
+*若想用python环境运行，需安装以下依赖*
 
 * python，[下载](https://www.python.org/ftp/python/3.9.4/python-3.9.4-amd64.exe)并安装
 
 * python第三方库requests。打开命令行（按win+r，在打开的窗口中输入cmd，回车），运行如下命令安装：
 
-  ```bash
-  pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-  ```
+```bash
+pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+**若使用GPU运行自动生成字幕功能，需要先安装cuda版本的pytorch，具体安装方法见[pytorch官网](https://pytorch.org/get-started/locally/)**
+
+安装whisper：（依赖于pytorch，若未安装pytorch，会自动安装，但是cpu版本）
+```bash
+pip install -r requirements_whisper.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
 
 ## 注意
 
@@ -61,7 +94,5 @@ sudo apt install ffmpeg
 pip install pyinstaller
 # 打包
 pyinstaller -F main.py
+pyinstaller -F gen_caption.py
 ```
-
-## 语音转文字
-

@@ -6,3 +6,4 @@ old/
 build/
 dist/
 *.spec
+whisper_models/

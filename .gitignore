@@ -6,3 +6,5 @@ old/
 build/
 dist/
 *.spec
+whisper_models/
+release_*/

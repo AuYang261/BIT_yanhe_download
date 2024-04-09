@@ -18,54 +18,64 @@ def seconds_to_hmsm(seconds):
     seconds = str(int(seconds))
     # 补0
     if len(hours) < 2:
-        hours = '0' + hours
+        hours = "0" + hours
     if len(minutes) < 2:
-        minutes = '0' + minutes
+        minutes = "0" + minutes
     if len(seconds) < 2:
-        seconds = '0' + seconds
+        seconds = "0" + seconds
     if len(milliseconds) < 3:
-        milliseconds = '0'*(3-len(milliseconds)) + milliseconds
+        milliseconds = "0" * (3 - len(milliseconds)) + milliseconds
     return f"{hours}:{minutes}:{seconds},{milliseconds}"
 
 
 def main():
     # 视频文件路径
+    video_paths = []
     if len(sys.argv) >= 2:
-        video_path = sys.argv[1]
+        video_paths.append(sys.argv[1])
     else:
         files = []
-        for dirpath, dirnames, filenames in os.walk('output/'):
+        for dirpath, dirnames, filenames in os.walk("output/"):
             for filename in filenames:
-                if filename.endswith('.mp4'):
-                    files.append(os.path.join(dirpath, filename))
+                if filename.endswith(".mp4"):
+                    files.append(os.path.join(dirpath, filename).replace("\\", "/"))
         for i, f in enumerate(files):
-            print(i, ":", f)
-        video_path = files[eval(input('select a video file by input a num: '))]
+            print(f"[{i}]: ", f)
+        input_list = eval("[" + input("select a video file by input a num: ") + "]")
+        for i in input_list:
+            video_paths.append(files[i])
 
-    audio_path = video_path.replace("mp4", "m4a")
-    cmd = f"ffmpeg -i '{video_path}' -vn -ar {whisper.audio.SAMPLE_RATE} '{audio_path}'"
-    os.system(cmd)
+    for video_path in video_paths:
+        audio_path = video_path.replace("mp4", "m4a")
+        cmd = f'ffmpeg -i "{video_path}" -vn -ar {whisper.audio.SAMPLE_RATE} "{audio_path}"'
+        os.system(cmd)
 
-    model = whisper.load_model("base", download_root="whisper_models/")
+        model = whisper.load_model("base", download_root="whisper_models/")
 
-    start = time.time()
-    result = model.transcribe(audio_path, verbose=False, language="zh")
-    print("Time cost: ", time.time() - start)
+        start = time.time()
+        result = model.transcribe(audio_path, verbose=False, language="zh")
+        print("Time cost: ", time.time() - start)
 
-    # 写入字幕文件
-    with open(video_path.replace("mp4", "srt"), 'w', encoding='utf-8') as f:
-        i = 1
-        for r in result['segments']:
-            f.write(str(i)+'\n')
-            f.write(seconds_to_hmsm(float(r['start'])) +
-                    ' --> '+seconds_to_hmsm(float(r['end']))+'\n')
-            i += 1
-            f.write(convert(r['text'], 'zh-cn')+'\n')  # 结果可能是繁体，转为简体zh-cn
-            f.write('\n')
-    
-    # 删除音频文件
-    os.remove(audio_path)
+        # 写入字幕文件
+        with open(video_path.replace("mp4", "srt"), "w", encoding="utf-8") as f:
+            i = 1
+            for r in result["segments"]:
+                f.write(str(i) + "\n")
+                f.write(
+                    seconds_to_hmsm(float(r["start"]))
+                    + " --> "
+                    + seconds_to_hmsm(float(r["end"]))
+                    + "\n"
+                )
+                i += 1
+                f.write(
+                    convert(r["text"], "zh-cn") + "\n"
+                )  # 结果可能是繁体，转为简体zh-cn
+                f.write("\n")
+
+        # 删除音频文件
+        os.remove(audio_path)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

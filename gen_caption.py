@@ -35,22 +35,37 @@ def main():
         video_paths.append(sys.argv[1])
     else:
         files = []
-        for dirpath, dirnames, filenames in os.walk("output/"):
+        for dirpath, dirnames, filenames in os.walk("."):
             for filename in filenames:
                 if filename.endswith(".mp4"):
                     files.append(os.path.join(dirpath, filename).replace("\\", "/"))
         for i, f in enumerate(files):
             print(f"[{i}]: ", f)
-        input_list = eval("[" + input("select a video file by input a num: ") + "]")
+        input_list = eval(
+            "[" + input("select a video file by input a num(split with ','): ") + "]"
+        )
         for i in input_list:
             video_paths.append(files[i])
+        print("selected video files:", video_paths)
+        models = []
+        for model in whisper.available_models():
+            if ".en" in model:
+                continue
+            print(f"[{len(models)}]: ", model)
+            models.append(model)
+        model_index = input("select a model by input a num(default 'base'): ")
+        try:
+            model_name = models[eval(model_index)]
+        except:
+            model_name = "base"
+        print("selected model:", model_name)
 
     for video_path in video_paths:
         audio_path = video_path.replace("mp4", "m4a")
         cmd = f'ffmpeg -i "{video_path}" -vn -ar {whisper.audio.SAMPLE_RATE} "{audio_path}"'
         os.system(cmd)
 
-        model = whisper.load_model("base", download_root="whisper_models/")
+        model = whisper.load_model(model_name, download_root="whisper_models/")
 
         start = time.time()
         result = model.transcribe(audio_path, verbose=False, language="zh")

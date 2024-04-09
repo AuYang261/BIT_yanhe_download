@@ -8,7 +8,7 @@
 
 ## 使用：下载指定课程
 
-[下载并解压](https://github.com/AuYang261/BIT_yanhe_download/releases/latest/download/yanhe.zip)。
+[下载并解压](https://github.com/AuYang261/BIT_yanhe_download/releases/latest/download/release_downloader.zip)。
 
 在[延河课堂 (yanhekt.cn)](https://www.yanhekt.cn/recordCourse)中找到想下载的课程，以链接为https://www.yanhekt.cn/course/40524 的课程为例，复制地址栏最后的五位编号40524。注意是课程列表的链接（以`yanhekt.cn/course/五位编号`开头），不是视频界面的链接（以`yanhekt.cn/session/六位编号`开头）。
 
@@ -32,17 +32,17 @@
 
 最好使用GPU运行，否则速度较慢，依赖见[下文](#依赖)。
 
-下载[生成字幕可执行文件]()，保存在上述解压的目录中，如下所示：
+下载[字幕生成程序gen_caption](https://github.com/AuYang261/BIT_yanhe_download/releases/latest)，由于程序比较大，采用了分卷压缩发布。全部下载并解压，得到一个`gen_caption.exe`可执行文件，保存在上述`release_downloader.zip`解压的目录中，和保存视频的目录`output/`同级，如下所示：
 
 ![image-20240409105228362](md/README/image-20240409105228362.png)
 
-下载完视频后，双击运行`gen_caption.exe`（文件较大，需要等一会），输入数字选择视频，回车：
+下载完视频后，双击运行`gen_caption.exe`（文件较大，需要等一会），输入数字选择视频，回车。再输入数字选择使用多大的模型，越往下效果越好，但所需时间也越长，默认使用base模型。第一次使用会自动下载模型（几百M），请耐心等待。如下所示：
 
-![image-20240409103224309](md/README/image-20240409103224309.png)
+![image-20240409131033038](md/README/image-20240409131033038.png)
 
 等待程序运行完成，生成的字幕文件为`.srt`格式，与视频文件在同级目录下，用支持字幕的播放器（如potplayer）打开视频即可看到带字幕的视频。
 
-*tips: 语音转文字所需的时间较长，可以先观看视频，字幕生成好了再重新打开视频享受字幕。使用GPU大约需要几分钟，若无GPU则不建议使用本项目提供的字幕功能，可自行寻找其他生成字幕的工具。*
+*tips: 语音转文字所需的时间较长，可以先观看视频，字幕生成好了再重新打开视频享受字幕。使用GPU大约需要几分钟，不使用GPU则需要更长时间。*
 
 ## 依赖
 
@@ -109,4 +109,4 @@ pyinstaller --clean .\gen_caption.spec
 
 ![image-20240409095831766](md/README/image-20240409095831766.png)
 
-可将项目`hooks`目录下的`hook-whisper.py`和`hook-zhconv.py`文件复制到pyinstaller的hook目录下（通常在`python根目录\Lib\site-packages\PyInstaller\hooks`），参考[这个](https://blog.csdn.net/qq_42324086/article/details/118280341)。
+解决方法参考[这个](https://blog.csdn.net/qq_42324086/article/details/118280341)，将项目`hooks`目录下的`hook-whisper.py`和`hook-zhconv.py`文件复制到pyinstaller的hook目录下（通常在`python根目录\Lib\site-packages\PyInstaller\hooks`），。

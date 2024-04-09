@@ -7,4 +7,4 @@ build/
 dist/
 *.spec
 whisper_models/
-release-downloader/
+release_*/

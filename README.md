@@ -8,13 +8,13 @@
 
 ## 使用：下载指定课程
 
-[下载并解压](https://github.com/AuYang261/BIT_yanhe_download/releases/latest/download/release_downloader.zip)。
+[点击此处下载](https://github.com/AuYang261/BIT_yanhe_download/releases/latest/download/release_downloader.zip)并解压。
 
 在[延河课堂 (yanhekt.cn)](https://www.yanhekt.cn/recordCourse)中找到想下载的课程，以链接为https://www.yanhekt.cn/course/40524 的课程为例，复制地址栏最后的五位编号40524。注意是课程列表的链接（以`yanhekt.cn/course/五位编号`开头），不是视频界面的链接（以`yanhekt.cn/session/六位编号`开头）。
 
 ![image-20231018204208066](md/README/image-20231018204208066.png)
 
-双击运行`main.exe`（Release中的）或`run.bat`文件，并输入你想下载的课程编号(40524)。输出课程视频列表：
+双击运行`main.exe`文件，并输入你想下载的课程编号(40524)。输出课程视频列表：
 
 ![image-20240409103306945](md/README/image-20240409103306945.png)
 

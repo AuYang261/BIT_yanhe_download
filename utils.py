@@ -5,6 +5,7 @@ import m3u8dl
 
 
 def get_course_info(courseID):
+    courseID = courseID.strip()
     headers = {
         "Origin": "https://www.yanhekt.cn",
         "xdomain-client": "web_user",
@@ -24,7 +25,7 @@ def get_course_info(courseID):
         # print(course.json()["code"])
         # print(course.json()["message"])
         raise Exception(
-            "请检查您的课程ID，注意它应该是5位数字，从课程信息界面的链接yanhekt.cn/course/***获取，而不是课程播放界面的链接yanhekt.cn/session/***"
+            f"courseID: {courseID}, {course.json()['message']}。请检查您的课程ID，注意它应该是5位数字，从课程信息界面的链接yanhekt.cn/course/***获取，而不是课程播放界面的链接yanhekt.cn/session/***"
         )
     # print(course.json()["data"]["name_zh"])
     videoList = res.json()["data"]

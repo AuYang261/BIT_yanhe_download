@@ -1,12 +1,17 @@
 import curses
 import utils
 import m3u8dl
+import os
+import sys
+import time
 
 videoList = []
 courseName = ""
 professor = ""
 selected_videos = []
 selected_signal = []
+
+align = 0
 
 
 class Row:
@@ -15,27 +20,33 @@ class Row:
         self.highlighted = highlighted
 
 
+def draw_line(stdscr, text, row):
+    # 在每个中文字符后插入一个空格，以解决中文字符宽度问题
+    new_text = ""
+    for c in text:
+        new_text += c
+        if ord(c) > 127:
+            new_text += " "
+    stdscr.addnstr(row, align, new_text, get_cmd_window_size(stdscr)[1])
+
+
 def draw_menu(stdscr, options, checked, title, current_row):
     stdscr.clear()
-    height, width = stdscr.getmaxyx()
-    stdscr.addnstr(0, 0, title, width // 2)
+    height, width = get_cmd_window_size(stdscr)
+    draw_line(stdscr, title, 0)
     msg = []
     for idx, option in enumerate(options):
         checkmark = "[X]" if checked[idx] else "[ ]"
         msg.append(Row(f"{checkmark} {option}", idx == current_row))
     draw_multi_select(stdscr, msg, current_row)
-    stdscr.addnstr(
-        height - 1,
-        0,
-        "按上下键移动，按空格键选择/取消选择，按回车键确认，按q键退出",
-        width // 2,
-    )
+    draw_line(stdscr, "按上下键移动，按空格键选择/取消选择", height - 2)
+    draw_line(stdscr, "按回车键确认，按q键退出", height - 1)
     stdscr.refresh()
 
 
 def draw_multi_select(stdscr, messages: list, center_row):
     # 获取屏幕的行数和列数
-    height, width = stdscr.getmaxyx()
+    height, width = get_cmd_window_size(stdscr)
 
     # 计算消息的开始位置以使其居中
     total_messages = len(messages)
@@ -50,21 +61,15 @@ def draw_multi_select(stdscr, messages: list, center_row):
 
     for i in range(start_index, end_index):
         message = messages[i]
-        row = start_row + (i - start_index)
-        text = message.text
-        if len(text) > width:
-            text = text[:width]  # 截断文本以适应屏幕宽度
-
-        if message.highlighted:
-            stdscr.attron(curses.A_REVERSE)
-            stdscr.addstr(row, (width - len(text)) // 2, text)  # 居中显示文本
-            stdscr.attroff(curses.A_REVERSE)
-        else:
-            stdscr.addstr(row, (width - len(text)) // 2, text)  # 居中显示文本
+        draw_line(
+            stdscr,
+            message.text + (" <=" if message.highlighted else ""),
+            start_row + (i - start_index),
+        )
 
 
 def multi_select(stdscr, options, title):
-    curses.curs_set(0)  # 隐藏光标
+    # curses.curs_set(0)  # 隐藏光标
     checked = [False] * len(options)
     current_row = 0
     while True:
@@ -76,7 +81,7 @@ def multi_select(stdscr, options, title):
         elif key == curses.KEY_UP:
             current_row = (current_row - 1) % len(options)  # 向上循环移动
         elif key == ord("q"):
-            exit()  # 退出程序
+            sys.exit()  # 退出程序
         elif key == ord(" "):
             checked[current_row] = not checked[current_row]  # 切换当前行的勾选状态
         elif key == curses.KEY_ENTER or key in [10, 13]:
@@ -89,31 +94,33 @@ def multi_select(stdscr, options, title):
 def config(stdscr):
     global videoList, courseName, professor, selected_videos, selected_signal
 
+    height, width = get_cmd_window_size(stdscr)
+
     # 开启回显
     curses.echo()
+    # 设置背景色
+    curses.start_color()
+    # 设置颜色对
+    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
+    # 设置窗口
+    stdscr.clear()
+    stdscr.refresh()
 
+    # stdscr.border(0)
     # 提示用户输入
     url_base = "https://www.yanhekt.cn/course/"
-    while True:
-        # 清除屏幕
-        stdscr.clear()
-        stdscr.addstr(f"(按q键退出)\n\n")
-        stdscr.addstr(f"请输入课程编号: {url_base}")
 
-        key = stdscr.getch()
-        if key == ord("q"):
-            exit()
-        elif key != 10:
-            break
+    draw_line(stdscr, "请输入课程编号(回车退出):", 0)
+
+    draw_line(stdscr, f"{url_base}", 1)
 
     # 等待用户输入字符串并显示它
-    courseID = chr(key).encode() + stdscr.getstr()
-    # courseID = b"45497"
+    courseID = stdscr.getstr()
+    if not courseID:
+        sys.exit()
     videoList, courseName, professor = utils.get_course_info(
         courseID=courseID.decode("utf-8")
     )
-
-    # videoList = [{"title": str(i)} for i in range(10)]
 
     selected_videos = []
 
@@ -125,7 +132,7 @@ def config(stdscr):
         )
         if not selected_videos:
             stdscr.clear()
-            stdscr.addstr("请至少选择一个视频，按回车继续")
+            draw_line(stdscr, "请至少选择一个视频，按回车继续", 0)
             stdscr.getch()
         else:
             break
@@ -143,7 +150,7 @@ def config(stdscr):
         )
         if not selected_signal:
             stdscr.clear()
-            stdscr.addstr("请至少选择一个信号，按回车继续")
+            draw_line(stdscr, "请至少选择一个信号，按回车继续", 0)
             stdscr.getch()
         else:
             break
@@ -151,30 +158,44 @@ def config(stdscr):
     stdscr.clear()
 
 
-def main():
-    while True:
-        curses.wrapper(config)
+def get_cmd_window_size(stdscr):
+    return stdscr.getmaxyx()
 
-        for i in selected_videos:
-            c = videoList[i]
-            name = courseName + "-" + professor + "-" + c["title"]
-            print(name)
-            try:
-                if 1 in selected_signal:
-                    m3u8dl.M3u8Download(
-                        c["videos"][0]["vga"],
-                        "output/" + courseName + "-screen",
-                        name,
-                    )
-                if 0 in selected_signal:
-                    m3u8dl.M3u8Download(
-                        c["videos"][0]["main"],
-                        "output/" + courseName + "-video",
-                        name,
-                    )
-            except Exception as e:
-                print(e)
-                exit()
+
+def main():
+    global align
+    align = 25
+    curses.wrapper(config)
+
+    fail = []
+    for i in selected_videos:
+        c = videoList[i]
+        name = courseName + "-" + professor + "-" + c["title"]
+        print(name)
+        try:
+            if 1 in selected_signal:
+                m3u8dl.M3u8Download(
+                    c["videos"][0]["vga"],
+                    "output/" + courseName + "-screen",
+                    name,
+                )
+            if 0 in selected_signal:
+                m3u8dl.M3u8Download(
+                    c["videos"][0]["main"],
+                    "output/" + courseName + "-video",
+                    name,
+                )
+        except Exception as e:
+            print(e)
+            fail.append(name)
+            input(f"下载{name}失败，按回车键开始下一个")
+    if fail:
+        print("以下视频下载失败：")
+        for f in fail:
+            print(f)
+        input("按回车键退出")
+    else:
+        input("下载结束，按回车键退出")
 
 
 if __name__ == "__main__":

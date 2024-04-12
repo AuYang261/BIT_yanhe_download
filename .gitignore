@@ -8,3 +8,4 @@ dist/
 *.spec
 whisper_models/
 release_*/
+*.json

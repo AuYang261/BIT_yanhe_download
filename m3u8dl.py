@@ -9,9 +9,11 @@ import platform
 import requests
 import urllib3
 import time
+import signal
 from concurrent.futures import ThreadPoolExecutor
 
 from hashlib import md5
+
 
 class ThreadPoolExecutorWithQueueSizeLimit(ThreadPoolExecutor):
     """
@@ -40,7 +42,9 @@ class M3u8Download:
     :param base64_key: base64编码的字符串
     """
 
-    def __init__(self, url, workDir, name, max_workers=32, num_retries=999, base64_key=None):
+    def __init__(
+        self, url, workDir, name, max_workers=32, num_retries=999, base64_key=None
+    ):
 
         self._url = url
         self._token = None
@@ -49,9 +53,9 @@ class M3u8Download:
         self._max_workers = max_workers
         self._num_retries = num_retries
         if not os.path.exists(os.path.join(os.getcwd(), self._workDir)):
-            os.mkdir(os.path.join(os.getcwd(), self._workDir))
+            os.makedirs(os.path.join(os.getcwd(), self._workDir))
         self._file_path = os.path.join(os.getcwd(), self._workDir, self._name)
-        if os.path.exists(self._file_path + '.mp4'):
+        if os.path.exists(self._file_path + ".mp4"):
             print(f"File '{self._file_path}.mp4' already exists, skip download")
             return
         self._front_url = None
@@ -60,23 +64,36 @@ class M3u8Download:
         self._ts_sum = 0
         self._key = base64.b64decode(base64_key.encode()) if base64_key else None
         self._headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36 Edg/93.0.961.52',
-            'Origin': 'https://www.yanhekt.cn',
-            'referer': 'https://www.yanhekt.cn/',
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36 Edg/93.0.961.52",
+            "Origin": "https://www.yanhekt.cn",
+            "referer": "https://www.yanhekt.cn/",
         }
         self.magic = "1tJrMwNq3h0yLgx86Rued2J1tFc"
         self.updateSignature()
 
         urllib3.disable_warnings()
 
-        self._url=self.encryptURL(self._url)
+        self._url = self.encryptURL(self._url)
 
         self.get_m3u8_info(self._url, self._num_retries)
-        print('Downloading: %s' % self._name, 'Save path: %s' % self._file_path, sep='\n')
+
+        def signal_handler(sig, frame):
+            print("Caught KeyboardInterrupt. Shutting down...")
+            os._exit(1)
+
+        signal.signal(signal.SIGINT, signal_handler)
+        print(
+            "Downloading: %s" % self._name, "Save path: %s" % self._file_path, sep="\n"
+        )
         with ThreadPoolExecutorWithQueueSizeLimit(self._max_workers) as pool:
             pool.submit(self.updateSignatureLoop)
             for k, ts_url in enumerate(self._ts_url_list):
-                pool.submit(self.download_ts, ts_url, os.path.join(self._file_path, str(k)), self._num_retries)
+                pool.submit(
+                    self.download_ts,
+                    ts_url,
+                    os.path.join(self._file_path, str(k)),
+                    self._num_retries,
+                )
         if self._success_sum == self._ts_sum:
             self.output_mp4()
             self.delete_file()
@@ -84,7 +101,9 @@ class M3u8Download:
 
     def updateSignature(self):
         self.timestamp = str(int(time.time()))
-        self.signature = md5((self.magic + "_v1_" + self.timestamp).encode()).hexdigest()
+        self.signature = md5(
+            (self.magic + "_v1_" + self.timestamp).encode()
+        ).hexdigest()
 
     def updateSignatureLoop(self):
         while self._success_sum != self._ts_sum:
@@ -92,23 +111,24 @@ class M3u8Download:
             time.sleep(10)
 
     def encryptURL(self, url):
-        url_list = url.split('/')
+        url_list = url.split("/")
         # "a97f12c055a10ee51d60e441e618bfef"
         url_list.insert(-1, md5((self.magic + "_100").encode()).hexdigest())
-        return '/'.join(url_list)
+        return "/".join(url_list)
 
     def getToken(self):
         if self._token == None:
             headers = {
                 "Xdomain-Client": "web_user",
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36 Edg/93.0.961.52',
-                'Origin': 'https://www.yanhekt.cn',
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36 Edg/93.0.961.52",
+                "Origin": "https://www.yanhekt.cn",
             }
 
-            req = requests.get("https://cbiz.yanhekt.cn/v1/auth/video/token?id=0",
-                               headers=headers)
-            data = req.json()['data']
-            self._token = data['token']
+            req = requests.get(
+                "https://cbiz.yanhekt.cn/v1/auth/video/token?id=0", headers=headers
+            )
+            data = req.json()["data"]
+            self._token = data["token"]
         return self._token
 
     def get_m3u8_info(self, m3u8_url, num_retries):
@@ -117,21 +137,31 @@ class M3u8Download:
         """
 
         token = self.getToken()
-        url = m3u8_url+"?Xvideo_Token="+token+"&Xclient_Timestamp=" + self.timestamp+"&Xclient_Signature=" + \
-            self.signature+"&Xclient_Version=v1&Platform=yhkt_user"
+        url = (
+            m3u8_url
+            + "?Xvideo_Token="
+            + token
+            + "&Xclient_Timestamp="
+            + self.timestamp
+            + "&Xclient_Signature="
+            + self.signature
+            + "&Xclient_Version=v1&Platform=yhkt_user"
+        )
         try:
-            with requests.get(url, timeout=(3, 30), verify=False, headers=self._headers) as res:
+            with requests.get(
+                url, timeout=(3, 30), verify=False, headers=self._headers
+            ) as res:
                 self._front_url = res.url.split(res.request.path_url)[0]
                 if "EXT-X-STREAM-INF" in res.text:  # 判定为顶级M3U8文件
-                    for line in res.text.split('\n'):
+                    for line in res.text.split("\n"):
                         if "#" in line:
                             continue
-                        elif line.startswith('http'):
+                        elif line.startswith("http"):
                             self._url = line
-                        elif line.startswith('/'):
+                        elif line.startswith("/"):
                             self._url = self._front_url + line
                         else:
-                            self._url = self._url.rsplit("/", 1)[0] + '/' + line
+                            self._url = self._url.rsplit("/", 1)[0] + "/" + line
                     self.get_m3u8_info(self._url, self._num_retries)
                 else:
                     m3u8_text_str = res.text
@@ -147,54 +177,74 @@ class M3u8Download:
         """
         if not os.path.exists(self._file_path):
             os.mkdir(self._file_path)
-        new_m3u8_str = ''
+        new_m3u8_str = ""
         ts = make_sum()
-        for line in m3u8_text_str.split('\n'):
+        for line in m3u8_text_str.split("\n"):
             if "#" in line:
                 if "EXT-X-KEY" in line and "URI=" in line:
-                    if os.path.exists(os.path.join(self._file_path, 'key')):
+                    if os.path.exists(os.path.join(self._file_path, "key")):
                         continue
                     key = self.download_key(line, 5)
                     if key:
-                        new_m3u8_str += f'{key}\n'
+                        new_m3u8_str += f"{key}\n"
                         continue
-                new_m3u8_str += f'{line}\n'
+                new_m3u8_str += f"{line}\n"
                 if "EXT-X-ENDLIST" in line:
                     break
             else:
-                if line.startswith('http'):
+                if line.startswith("http"):
                     self._ts_url_list.append(line)
-                elif line.startswith('/'):
+                elif line.startswith("/"):
                     self._ts_url_list.append(self._front_url + line)
                 else:
-                    self._ts_url_list.append(self._url.rsplit("/", 1)[0] + '/' + line)
-                new_m3u8_str += (os.path.join(self._file_path, str(next(ts))) + '\n')
+                    self._ts_url_list.append(self._url.rsplit("/", 1)[0] + "/" + line)
+                new_m3u8_str += os.path.join(self._file_path, str(next(ts))) + "\n"
         self._ts_sum = next(ts)
-        with open(self._file_path + '.m3u8', "wb") as f:
-            if platform.system() == 'Windows':
+        with open(self._file_path + ".m3u8", "wb") as f:
+            if platform.system() == "Windows":
                 # f.write(new_m3u8_str.encode('gbk'))
-                f.write(new_m3u8_str.encode('utf-8'))
+                f.write(new_m3u8_str.encode("utf-8"))
             else:
-                f.write(new_m3u8_str.encode('utf-8'))
+                f.write(new_m3u8_str.encode("utf-8"))
 
     def download_ts(self, ts_url, name, num_retries):
         """
         下载 .ts 文件
         """
         token = self.getToken()
-        ts_url = ts_url.split('\n')[0]+"?Xvideo_Token="+token+"&Xclient_Timestamp=" + \
-            self.timestamp+"&Xclient_Signature="+self.signature+"&Xclient_Version=v1&Platform=yhkt_user"
+        ts_url = (
+            ts_url.split("\n")[0]
+            + "?Xvideo_Token="
+            + token
+            + "&Xclient_Timestamp="
+            + self.timestamp
+            + "&Xclient_Signature="
+            + self.signature
+            + "&Xclient_Version=v1&Platform=yhkt_user"
+        )
         try:
             if not os.path.exists(name):
-                with requests.get(ts_url, stream=True, timeout=(5, 60), verify=False, headers=self._headers) as res:
+                with requests.get(
+                    ts_url,
+                    stream=True,
+                    timeout=(5, 60),
+                    verify=False,
+                    headers=self._headers,
+                ) as res:
                     if res.status_code == 200:
                         with open(name, "wb") as ts:
                             for chunk in res.iter_content(chunk_size=1024):
                                 if chunk:
                                     ts.write(chunk)
                         self._success_sum += 1
-                        sys.stdout.write('\r[%-25s](%d/%d)' % ("*" * (100 * self._success_sum // self._ts_sum // 4),
-                                                               self._success_sum, self._ts_sum))
+                        sys.stdout.write(
+                            "\r[%-25s](%d/%d)"
+                            % (
+                                "*" * (100 * self._success_sum // self._ts_sum // 4),
+                                self._success_sum,
+                                self._ts_sum,
+                            )
+                        )
                         sys.stdout.flush()
                     else:
                         self.download_ts(ts_url, name, num_retries - 1)
@@ -213,24 +263,26 @@ class M3u8Download:
         mid_part = re.search(r"URI=[\'|\"].*?[\'|\"]", key_line).group()
         may_key_url = mid_part[5:-1]
         if self._key:
-            with open(os.path.join(self._file_path, 'key'), 'wb') as f:
+            with open(os.path.join(self._file_path, "key"), "wb") as f:
                 f.write(self._key)
             return f'{key_line.split(mid_part)[0]}URI="./{self._name}/key"'
-        if may_key_url.startswith('http'):
+        if may_key_url.startswith("http"):
             true_key_url = may_key_url
-        elif may_key_url.startswith('/'):
+        elif may_key_url.startswith("/"):
             true_key_url = self._front_url + may_key_url
         else:
-            true_key_url = self._url.rsplit("/", 1)[0] + '/' + may_key_url
+            true_key_url = self._url.rsplit("/", 1)[0] + "/" + may_key_url
         try:
-            with requests.get(true_key_url, timeout=(5, 30), verify=False, headers=self._headers) as res:
-                with open(os.path.join(self._file_path, 'key'), 'wb') as f:
+            with requests.get(
+                true_key_url, timeout=(5, 30), verify=False, headers=self._headers
+            ) as res:
+                with open(os.path.join(self._file_path, "key"), "wb") as f:
                     f.write(res.content)
             return f'{key_line.split(mid_part)[0]}URI="./{self._name}/key"{key_line.split(mid_part)[-1]}'
         except Exception as e:
             print(e)
-            if os.path.exists(os.path.join(self._file_path, 'key')):
-                os.remove(os.path.join(self._file_path, 'key'))
+            if os.path.exists(os.path.join(self._file_path, "key")):
+                os.remove(os.path.join(self._file_path, "key"))
             print("加密视频,无法加载key,解密失败")
             if num_retries > 0:
                 self.download_key(key_line, num_retries - 1)
@@ -239,7 +291,6 @@ class M3u8Download:
         """
         合并.ts文件，输出mp4格式视频，需要ffmpeg
         """
-        # 
         cmd = f'''ffmpeg -allowed_extensions ALL -i "{self._file_path}.m3u8" -acodec \
         copy -vcodec copy -f mp4 "{self._file_path}.mp4"'''
         # print(cmd)
@@ -250,4 +301,4 @@ class M3u8Download:
         for item in file:
             os.remove(os.path.join(self._file_path, item))
         os.removedirs(self._file_path)
-        os.remove(self._file_path + '.m3u8')
+        os.remove(self._file_path + ".m3u8")

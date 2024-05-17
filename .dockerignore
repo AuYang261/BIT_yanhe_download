@@ -1,0 +1,13 @@
+__pycache__/
+output/
+old/
+*.zip
+*.exe
+build/
+dist/
+*.spec
+whisper_models/
+release_*/
+*.json
+.idea
+.DS_Store

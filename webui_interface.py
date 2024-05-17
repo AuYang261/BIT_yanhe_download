@@ -202,4 +202,4 @@ def static_files(path):
 if __name__ == '__main__':
     t = threading.Thread(target=execute_tasks)
     t.start()
-    app.run(debug=False, use_reloader=False, port=5000)
+    app.run(debug=False,host='0.0.0.0', use_reloader=False, port=5001)

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Download Task Manager</title>
+  </head>
+  <body>
+    <div class="container">
+      <button id="newTaskButton" class="btn blue">新建任务</button>
+      <div id="taskList">
+        
+      </div>
+    </div>
+
+    <!-- Popup for creating a new task -->
+    <div id="taskPopup" class="popup">
+      <div class="popup-content">
+        <span class="close">×</span>
+        <form id="taskForm">
+          <div class="form-group">
+            <label for="courseId">课程ID号:</label>
+            <input
+              type="text"
+              id="courseId"
+              name="courseId"
+              class="input-field"
+            />
+            <button type="button" class="btn" onclick="fetchCourseNumber()">
+              获取课程信息
+            </button>
+          </div>
+          <div class="form-group">
+            <label for="downloadType">下载类型:</label>
+            <select id="downloadType" name="downloadType" class="input-field">
+              <option value="1">摄像头</option>
+              <option value="2">电脑屏幕</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label id="courseName11">课程名:</label>
+            <label id="professor11">老师:</label>
+          </div>
+          <div class="form-group">
+            <label for="courses">选择课程编号:</label>
+            <ul id="courseList">
+              <li data-value="1">请获取课程信息</li>
+            </ul>
+          </div>
+          <button type="submit" class="btn blue">新建任务</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

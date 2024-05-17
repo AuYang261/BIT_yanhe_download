@@ -9,3 +9,5 @@ dist/
 whisper_models/
 release_*/
 *.json
+.idea
+.DS_Store

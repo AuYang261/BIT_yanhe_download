@@ -103,7 +103,13 @@ function cancelTask(btn) {
   console.log(uuid);
   fetch(`/kill_task?uuid=${uuid}`)
     .then((response) => response.json())
-    .then((data) => console.log(data))
+    .then((data) => {
+      console.log(data);
+      let remove_node = document.getElementById(`${uuid}-task`);
+      if(remove_node != null) {
+        remove_node.parentNode.removeChild(remove_node);
+      }
+    })
     .catch((error) => console.error("Error:", error));
 }
 
@@ -112,7 +118,8 @@ setInterval(() => {
     if (task_obj["canceled"]) {
       return;
     }
-    const download_version = task_obj["download_type"] == 2 ? "电脑屏幕" : "摄像头"
+    const download_version =
+      task_obj["download_type"] == 2 ? "电脑屏幕" : "摄像头";
     const html = `
       <div class="task" id="${task_obj["uuid"]}-task">
         <div class="task-info">
@@ -131,7 +138,8 @@ setInterval(() => {
         </div>
       </div>
     `;
-    document.getElementById("taskList").innerHTML += html;
+    let taskList = document.getElementById("taskList");
+    taskList.innerHTML = html + taskList.innerHTML;
   };
   const updateElement = (task_obj) => {
     const uuid = task_obj["uuid"];

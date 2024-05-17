@@ -93,6 +93,7 @@ def execute_tasks():
             task_uuid = task["uuid"]
             task_obj, task_id = find_all_task_by_uuid(task_uuid)
             if task_obj["canceled"] == True:
+                all_task_status.pop(task_id)
                 continue
             process = multiprocessing.Process(target=execute_one_download_task_worker, args=(task_obj, queue))
             process.start()
@@ -100,6 +101,7 @@ def execute_tasks():
                 if all_task_status[task_id]["canceled"]:
                     print("task canceled, terminate subprocess...")
                     process.terminate()
+                    all_task_status.pop(task_id)
                     break
                 try:
                     msg = queue.get_nowait()
@@ -192,6 +194,10 @@ def kill_task():
     global all_task_status
     uuid = request.args.get('uuid')
     task, id = find_all_task_by_uuid(uuid)
+    if task["merge_status"] == 2:
+        # if already finished
+        all_task_status.pop(id)
+        return jsonify({"status": "ok"})
     all_task_status[id]["canceled"] = True
     return jsonify({"status": "ok"})
 

@@ -6,12 +6,6 @@ document.getElementsByClassName("close")[0].onclick = function () {
   document.getElementById("taskPopup").style.display = "none";
 };
 
-window.onclick = function (event) {
-  if (event.target === document.getElementById("taskPopup")) {
-    document.getElementById("taskPopup").style.display = "none";
-  }
-};
-
 // Implement the logic to fetch course number and handle form submission
 function fetchCourseNumber() {
   fetch(`/get_course?course_id=${document.getElementById("courseId").value}`)
@@ -174,3 +168,10 @@ listItems.forEach((item) => {
     item.classList.toggle("selected");
   });
 });
+
+function selectAll(select) {
+  let list = document.getElementById("courseList");
+  for(let i=0;i<list.childNodes.length;i++) {
+    list.childNodes[i].className = select ? "selected" : "";
+  }
+}

@@ -2,7 +2,7 @@
 <html lang="ch">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=0.5" />
     <link rel="stylesheet" href="styles.css" />
     <title>沿河下载器</title>
   </head>
@@ -44,6 +44,8 @@
           </div>
           <div class="form-group">
             <label for="courses">选择课程编号:</label>
+            <button type="button" class="btn blue" onclick="selectAll(true);">全选</button>
+            <button type="button" class="btn blue" onclick="selectAll(false);">全不选</button>
             <ul id="courseList">
               <li data-value="1">请获取课程信息</li>
             </ul>

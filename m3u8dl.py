@@ -32,6 +32,8 @@ def make_sum():
         yield ts_num
         ts_num += 1
 
+def dummy_func(downloaded, total, merge_status):
+    return
 
 class M3u8Download:
     """
@@ -43,7 +45,7 @@ class M3u8Download:
     """
 
     def __init__(
-        self, url, workDir, name, max_workers=32, num_retries=999, base64_key=None
+        self, url, workDir, name, max_workers=32, num_retries=999, base64_key=None, progress_callback=dummy_func
     ):
 
         self._url = url
@@ -52,11 +54,13 @@ class M3u8Download:
         self._name = name
         self._max_workers = max_workers
         self._num_retries = num_retries
+        self._progress_callback = progress_callback
         if not os.path.exists(os.path.join(os.getcwd(), self._workDir)):
             os.makedirs(os.path.join(os.getcwd(), self._workDir))
         self._file_path = os.path.join(os.getcwd(), self._workDir, self._name)
         if os.path.exists(self._file_path + ".mp4"):
             print(f"File '{self._file_path}.mp4' already exists, skip download")
+            self._progress_callback(100, 100, 2)
             return
         self._front_url = None
         self._ts_url_list = []
@@ -95,9 +99,11 @@ class M3u8Download:
                     self._num_retries,
                 )
         if self._success_sum == self._ts_sum:
+            self._progress_callback(self._success_sum, self._ts_sum, 1)
             self.output_mp4()
             self.delete_file()
             print(f"Download successfully --> {self._name}")
+            self._progress_callback(self._success_sum, self._ts_sum, 2)
 
     def updateSignature(self):
         self.timestamp = str(int(time.time()))
@@ -250,6 +256,8 @@ class M3u8Download:
                         self.download_ts(ts_url, name, num_retries - 1)
             else:
                 self._success_sum += 1
+
+            self._progress_callback(self._success_sum, self._ts_sum, 0)
         except Exception as e:
             if os.path.exists(name):
                 os.remove(name)

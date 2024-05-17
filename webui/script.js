@@ -112,10 +112,11 @@ setInterval(() => {
     if (task_obj["canceled"]) {
       return;
     }
+    const download_version = task_obj["download_type"] == 2 ? "电脑屏幕" : "摄像头"
     const html = `
       <div class="task" id="${task_obj["uuid"]}-task">
         <div class="task-info">
-          <span>${task_obj["name"]}</span>
+          <span>${task_obj["name"]}(${download_version})</span>
           <div class="status-container">
             <span class="status" id="${
               task_obj["uuid"]

@@ -26,6 +26,7 @@ app = Flask(__name__, static_folder='webui')
         "uuid":
         "canceled":
         "merge_status": 
+        “download_type”
     }
 """
 all_task_status = [
@@ -162,7 +163,8 @@ def new_task():
             "tot": 0,
             "uuid": cur_uuid,
             "canceled": False,
-            "merge_status": 0
+            "merge_status": 0,
+            "download_type": download_version
         }
 
         if download_version == "2":
@@ -200,4 +202,4 @@ def static_files(path):
 if __name__ == '__main__':
     t = threading.Thread(target=execute_tasks)
     t.start()
-    app.run(debug=True, use_reloader=False)
+    app.run(debug=False, use_reloader=False, port=5000)

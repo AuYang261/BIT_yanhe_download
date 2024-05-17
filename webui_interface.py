@@ -114,7 +114,11 @@ def execute_tasks():
                         break
                     time.sleep(0.1)
                     continue
+                except TypeError:
+                    continue
         except Empty:
+            continue
+        except TypeError:
             continue
 
 @app.route('/')

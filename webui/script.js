@@ -145,12 +145,25 @@ setInterval(() => {
     const progress = (100 * task_obj["cur"]) / task_obj["tot"];
     progress_ele.style.width = `${progress.toFixed(2)}%`;
   };
+  const removeCanceledElement = (uuid_arr) => {
+    let all_task_elem = document.getElementsByClassName("task");
+    for(let i=0;i<all_task_elem.length;i++) {
+      const uuid = all_task_elem[i].getAttribute("id").replace("-task", "");
+      if(!uuid_arr.includes(uuid)) {
+        all_task_elem[i].parentNode.removeChild(all_task_elem[i]);
+      }
+    }
+  }
   fetch("/get_status")
     .then((response) => response.json())
     .then((data) => {
       // console.log(data);
+      let uuid_arr = [];
       for (let i = 0; i < data.length; i++) {
         const uuid = data[i]["uuid"];
+        if(!data[i]["canceled"]) {
+          uuid_arr.push(uuid);
+        }
         let exist_ele = document.getElementById(`${uuid}-task`);
         if (exist_ele == null) {
           addElement(data[i]);
@@ -158,6 +171,7 @@ setInterval(() => {
           updateElement(data[i]);
         }
       }
+      removeCanceledElement(uuid_arr);
     })
     .catch((error) => console.error("Error:", error));
 }, 1000);

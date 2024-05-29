@@ -14,7 +14,7 @@ import threading
 import ctypes
 import multiprocessing
 
-app = Flask(__name__, static_folder='webui')
+app = Flask(__name__, static_folder="webui")
 
 """
     {
@@ -26,12 +26,12 @@ app = Flask(__name__, static_folder='webui')
         "uuid":
         "canceled":
         "merge_status": 
-        “download_type”
+        "download_type":
+        "download_audio": bool
+        "audio_url":
     }
 """
-all_task_status = [
-
-]
+all_task_status = []
 
 
 """
@@ -48,16 +48,21 @@ def find_all_task_by_uuid(uuid):
             return task, id
     return None
 
+
 g_father_queue = None
 current_task_uuid = ""
+
+
 def executor_progress_callback(cur, tot, merge_status):
     global g_father_queue, current_task_uuid
-    g_father_queue.put({
-        "uuid": current_task_uuid,
-        "cur": cur,
-        "tot": tot,
-        "merge_status": merge_status
-    })
+    g_father_queue.put(
+        {
+            "uuid": current_task_uuid,
+            "cur": cur,
+            "tot": tot,
+            "merge_status": merge_status,
+        }
+    )
     # print({
     #     "uuid": current_task_uuid,
     #     "cur": cur,
@@ -76,13 +81,16 @@ def execute_one_download_task_worker(task_dict, father_queue):
     output = task_dict["output"]
     name = task_dict["name"]
     g_father_queue = father_queue
-    m3u8dl.M3u8Download(
-        url,
-        output,
-        name,
-        progress_callback=executor_progress_callback
-    )
+    m3u8dl.M3u8Download(url, output, name, progress_callback=executor_progress_callback)
+    if task_dict["download_audio"]:
+        audio_url = task_dict["audio_url"]
+        print(f"audio url: {audio_url}")
+        if audio_url:
+            print("Downloading audio...")
+            utils.download_audio(audio_url, output, name)
+            print("Download audio successfully.")
     return
+
 
 def execute_tasks():
     global all_task_status
@@ -95,7 +103,9 @@ def execute_tasks():
             if task_obj["canceled"] == True:
                 all_task_status.pop(task_id)
                 continue
-            process = multiprocessing.Process(target=execute_one_download_task_worker, args=(task_obj, queue))
+            process = multiprocessing.Process(
+                target=execute_one_download_task_worker, args=(task_obj, queue)
+            )
             process.start()
             while True:
                 if all_task_status[task_id]["canceled"]:
@@ -121,35 +131,32 @@ def execute_tasks():
         except TypeError:
             continue
 
-@app.route('/')
+
+@app.route("/")
 def index():
-    return send_from_directory(app.static_folder, 'index.html')
+    return send_from_directory(app.static_folder, "index.html")
 
 
-@app.route('/get_course')
+@app.route("/get_course")
 def get_course():
-    course_id = request.args.get('course_id')
+    course_id = request.args.get("course_id")
     try:
         videoList, courseName, professor = utils.get_course_info(courseID=course_id)
     except:
-        return jsonify({
-            "videoList": [],
-            "courseName": "",
-            "professor": ""
-        })
-    return jsonify({
-        "videoList": videoList,
-        "courseName": courseName,
-        "professor": professor
-    })
+        return jsonify({"videoList": [], "courseName": "", "professor": ""})
+    return jsonify(
+        {"videoList": videoList, "courseName": courseName, "professor": professor}
+    )
 
-@app.route('/new_task', methods=['POST'])
+
+@app.route("/new_task", methods=["POST"])
 def new_task():
     global task_queue, all_task_status
     data = request.json
-    course_id = data['course_id']
-    course_number = data['course_number']
-    download_version = data['download_version']
+    course_id = data["course_id"]
+    course_number = data["course_number"]
+    download_version = data["download_version"]
+    download_audio = data["download_audio"]
     videoList, courseName, professor = utils.get_course_info(courseID=course_id)
     course_number_arr = course_number.split(",")
     ret_id = []
@@ -170,9 +177,12 @@ def new_task():
             "uuid": cur_uuid,
             "canceled": False,
             "merge_status": 0,
-            "download_type": download_version
+            "download_type": download_version,
+            "download_audio": download_audio == "1",
+            "audio_url": "",
         }
 
+        task_status["audio_url"] = utils.get_audio_url(c["video_ids"][0])
         if download_version == "2":
             print("Downloading screen...")
             task_status["url"] = c["videos"][0]["vga"]
@@ -182,21 +192,21 @@ def new_task():
             task_status["url"] = c["videos"][0]["main"]
             task_status["output"] = "output/" + courseName + "-video"
         all_task_status.append(task_status)
-        task_queue.put({
-            "uuid": cur_uuid
-        })
+        task_queue.put({"uuid": cur_uuid})
 
     return jsonify({"status": "success", "task_id": ret_id})
 
-@app.route('/get_status')
+
+@app.route("/get_status")
 def get_status():
     global all_task_status
     return jsonify(all_task_status)
 
-@app.route('/kill_task')
+
+@app.route("/kill_task")
 def kill_task():
     global all_task_status
-    uuid = request.args.get('uuid')
+    uuid = request.args.get("uuid")
     task, id = find_all_task_by_uuid(uuid)
     if task["merge_status"] == 2:
         # if already finished
@@ -205,11 +215,14 @@ def kill_task():
     all_task_status[id]["canceled"] = True
     return jsonify({"status": "ok"})
 
-@app.route('/<path:path>')
+
+@app.route("/<path:path>")
 def static_files(path):
     return send_from_directory(app.static_folder, path)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
+    multiprocessing.freeze_support()
     t = threading.Thread(target=execute_tasks)
     t.start()
-    app.run(debug=False,host='0.0.0.0', use_reloader=False, port=5001)
+    app.run(debug=False, host="0.0.0.0", use_reloader=False, port=5001)

@@ -16,7 +16,6 @@ headers = {
 }
 
 
-# courseID = 31425
 def main():
     if len(sys.argv) == 1:
         courseID = input("输 入 课 程 ID: ")
@@ -24,31 +23,18 @@ def main():
         courseID = sys.argv[1]
 
     videoList, courseName, professor = utils.get_course_info(courseID=courseID)
-    # course = requests.get(
-    #     f"https://cbiz.yanhekt.cn/v1/course?id={courseID}&with_professor_badges=true",
-    #     headers=headers,
-    # )
-    # req = requests.get(
-    #     f"https://cbiz.yanhekt.cn/v2/course/session/list?course_id={courseID}",
-    #     headers=headers,
-    # )
-    # if course.json()["code"] != "0" and course.json()["code"] != 0:
-    #     print(course.json()["code"])
-    #     print(course.json()["message"])
-    #     raise Exception(
-    #         "Please Check your course ID, note that it should be started with yanhekt.cn/course/***, not yanhekt.cn/session/***"
-    #     )
-    # print(course.json()["data"]["name_zh"])
-    # videoList = req.json()["data"]
-    # print(json.dumps(videoList, indent=2))
+
     for i, c in enumerate(videoList):
         print(f"[{i}]: ", c["title"])
 
     index = eval(
-        "[" + input("选择课程编号(用 英 文 逗 号 ','分 隔, 例 如: 0,2,4): ") + "]"
+        "[" + input("选 择 课 程 编 号 (用 英 文 逗 号 ','分 隔, 例 如: 0,2,4): ") + "]"
     )
     vga = input(
-        "选 择 下 载 摄 像 头 (1) 还 是 电 脑 屏 幕(2)?(输 入 1 或 2, 默 认 摄 像 头):"
+        "选 择 下 载 摄 像 头 (1) 还 是 电 脑 屏 幕 (2)?(输 入 1 或 2, 默 认 摄 像 头):"
+    )
+    audio = input(
+        "是 否 下 载 教 室 蓝 牙 话 筒 的 音 频 ?若 教 师 未 使 用 蓝 牙 话 筒 则 该 音 频 无 声 音 (输 入 1不 下 载, 默 认 下 载):"
     )
     if not os.path.exists("output/"):
         os.mkdir("output/")
@@ -57,19 +43,19 @@ def main():
         name = courseName + "-" + professor + "-" + c["title"]
         print(name)
         if vga == "2":
+            path = f"output/{courseName}-screen"
             print("Downloading screen...")
-            m3u8dl.M3u8Download(
-                c["videos"][0]["vga"],
-                "output/" + courseName + "-screen",
-                name,
-            )
+            m3u8dl.M3u8Download(c["videos"][0]["vga"], path, name)
         else:
+            path = f"output/{courseName}-video"
             print("Downloading video...")
-            m3u8dl.M3u8Download(
-                c["videos"][0]["main"],
-                "output/" + courseName + "-video",
-                name,
-            )
+            m3u8dl.M3u8Download(c["videos"][0]["main"], path, name)
+        if audio == "" and c["video_ids"]:
+            audio_url = utils.get_audio_url(c["video_ids"][0])
+            if audio_url:
+                print("Downloading audio...")
+                utils.download_audio(audio_url, path, name)
+                print("Download audio successfully.")
 
 
 if __name__ == "__main__":

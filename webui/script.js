@@ -13,12 +13,10 @@ function fetchCourseNumber() {
     .then((data) => {
       console.log(data);
       document.getElementById("courseList").innerHTML = ``;
-      document.getElementById("courseName11").innerHTML = `课程名: <b>${
-        data.courseName == "" ? "未知" : data.courseName
-      }</b>`;
-      document.getElementById("professor11").innerHTML = `老师: <b>${
-        data.professor == "" ? "未知" : data.professor
-      }</b>`;
+      document.getElementById("courseName11").innerHTML = `课程名: <b>${data.courseName == "" ? "未知" : data.courseName
+        }</b>`;
+      document.getElementById("professor11").innerHTML = `老师: <b>${data.professor == "" ? "未知" : data.professor
+        }</b>`;
       let courseListHTML = "";
       for (let i = 0; i < data.videoList.length; i++) {
         courseListHTML += `<li data-value="${i}">${data.videoList[i].title}</li>`;
@@ -41,6 +39,7 @@ document.getElementById("taskForm").onsubmit = function (event) {
     return;
   }
   let downloadType = document.getElementById("downloadType").value;
+  let downloadAudio = document.getElementById("downloadAudio").value;
   let selected_index = [];
   let courseList = document.getElementById("courseList");
   for (let i = 0; i < courseList.childNodes.length; i++) {
@@ -59,6 +58,7 @@ document.getElementById("taskForm").onsubmit = function (event) {
       course_id: courseId.trim(),
       course_number: course_number,
       download_version: downloadType,
+      download_audio: downloadAudio
     }),
   })
     .then((response) => response.json())
@@ -100,7 +100,7 @@ function cancelTask(btn) {
     .then((data) => {
       console.log(data);
       let remove_node = document.getElementById(`${uuid}-task`);
-      if(remove_node != null) {
+      if (remove_node != null) {
         remove_node.parentNode.removeChild(remove_node);
       }
     })
@@ -119,12 +119,10 @@ setInterval(() => {
         <div class="task-info">
           <span>${task_obj["name"]}(${download_version})</span>
           <div class="status-container">
-            <span class="status" id="${
-              task_obj["uuid"]
-            }-status">${getDownloadStatusText(task_obj)}</span>
-            <button class="cancel-btn" data-task-uuid="${
-              task_obj["uuid"]
-            }" onclick="cancelTask(this);">×</button>
+            <span class="status" id="${task_obj["uuid"]
+      }-status">${getDownloadStatusText(task_obj)}</span>
+            <button class="cancel-btn" data-task-uuid="${task_obj["uuid"]
+      }" onclick="cancelTask(this);">×</button>
           </div>
         </div>
         <div class="progress-bar">
@@ -147,9 +145,9 @@ setInterval(() => {
   };
   const removeCanceledElement = (uuid_arr) => {
     let all_task_elem = document.getElementsByClassName("task");
-    for(let i=0;i<all_task_elem.length;i++) {
+    for (let i = 0; i < all_task_elem.length; i++) {
       const uuid = all_task_elem[i].getAttribute("id").replace("-task", "");
-      if(!uuid_arr.includes(uuid)) {
+      if (!uuid_arr.includes(uuid)) {
         all_task_elem[i].parentNode.removeChild(all_task_elem[i]);
       }
     }
@@ -161,7 +159,7 @@ setInterval(() => {
       let uuid_arr = [];
       for (let i = 0; i < data.length; i++) {
         const uuid = data[i]["uuid"];
-        if(!data[i]["canceled"]) {
+        if (!data[i]["canceled"]) {
           uuid_arr.push(uuid);
         }
         let exist_ele = document.getElementById(`${uuid}-task`);
@@ -185,7 +183,7 @@ listItems.forEach((item) => {
 
 function selectAll(select) {
   let list = document.getElementById("courseList");
-  for(let i=0;i<list.childNodes.length;i++) {
+  for (let i = 0; i < list.childNodes.length; i++) {
     list.childNodes[i].className = select ? "selected" : "";
   }
 }

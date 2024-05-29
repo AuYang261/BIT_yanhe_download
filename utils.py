@@ -4,13 +4,16 @@ import requests
 import m3u8dl
 
 
+headers = {
+    "Origin": "https://www.yanhekt.cn",
+    "Authorization": "Bearer 6277e60fa9e86fdcdd2411ce86a54f47",
+    "xdomain-client": "web_user",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.26",
+}
+
+
 def get_course_info(courseID):
     courseID = courseID.strip()
-    headers = {
-        "Origin": "https://www.yanhekt.cn",
-        "xdomain-client": "web_user",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.26",
-    }
 
     course = requests.get(
         f"https://cbiz.yanhekt.cn/v1/course?id={courseID}&with_professor_badges=true",
@@ -42,3 +45,17 @@ def get_course_info(courseID):
             else "未知教师"
         ),
     )
+
+
+def get_audio_url(video_id):
+    res = requests.get(
+        f"https://cbiz.yanhekt.cn/v1/video?id={video_id}",
+        headers=headers,
+    )
+    return res.json()["data"].get("audio", "")
+
+
+def download_audio(url, path, name):
+    res = requests.get(url, headers=headers)
+    with open(f"{path}/{name}.aac", "wb") as f:
+        f.write(res.content)

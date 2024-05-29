@@ -10,6 +10,7 @@ courseName = ""
 professor = ""
 selected_videos = []
 selected_signal = []
+download_audio = []
 
 align = 0
 
@@ -30,10 +31,11 @@ def draw_line(stdscr, text, row):
     stdscr.addnstr(row, align, new_text, get_cmd_window_size(stdscr)[1])
 
 
-def draw_menu(stdscr, options, checked, title, current_row):
+def draw_menu(stdscr, options, checked, title, subtitle, current_row):
     stdscr.clear()
     height, width = get_cmd_window_size(stdscr)
     draw_line(stdscr, title, 0)
+    draw_line(stdscr, subtitle, 1)
     msg = []
     for idx, option in enumerate(options):
         checkmark = "[X]" if checked[idx] else "[ ]"
@@ -50,7 +52,7 @@ def draw_multi_select(stdscr, messages: list, center_row):
 
     # 计算消息的开始位置以使其居中
     total_messages = len(messages)
-    visible_messages = min(height - 4, total_messages)  # 屏幕可以显示的最大消息数
+    visible_messages = min(height - 5, total_messages)  # 屏幕可以显示的最大消息数
     start_row = max(2, (height // 2) - (visible_messages // 2))
 
     # 确定要显示的消息的范围
@@ -68,12 +70,12 @@ def draw_multi_select(stdscr, messages: list, center_row):
         )
 
 
-def multi_select(stdscr, options, title):
+def multi_select(stdscr, options, title, subtitle=""):
     # curses.curs_set(0)  # 隐藏光标
     checked = [False] * len(options)
     current_row = 0
     while True:
-        draw_menu(stdscr, options, checked, title, current_row)
+        draw_menu(stdscr, options, checked, title, subtitle, current_row)
         key = stdscr.getch()
 
         if key == curses.KEY_DOWN:
@@ -92,7 +94,7 @@ def multi_select(stdscr, options, title):
 
 
 def config(stdscr):
-    global videoList, courseName, professor, selected_videos, selected_signal
+    global videoList, courseName, professor, selected_videos, selected_signal, download_audio
 
     height, width = get_cmd_window_size(stdscr)
 
@@ -137,11 +139,6 @@ def config(stdscr):
         else:
             break
 
-    # 清除屏幕并显示输入的内容
-    prompt = ["已选择以下视频：\n"]
-    for index in selected_videos:
-        prompt.append(f"{videoList[index]['title']}\n")
-
     selected_signal = []
 
     while True:
@@ -154,6 +151,13 @@ def config(stdscr):
             stdscr.getch()
         else:
             break
+
+    download_audio = multi_select(
+        stdscr,
+        ["下载蓝牙音频"],
+        "选择是否下载教室蓝牙话筒的音频（如果有的话）：",
+        "若教师未使用教室蓝牙话筒则该音频无声音",
+    )
 
     stdscr.clear()
 
@@ -174,17 +178,17 @@ def main():
         print(name)
         try:
             if 1 in selected_signal:
-                m3u8dl.M3u8Download(
-                    c["videos"][0]["vga"],
-                    "output/" + courseName + "-screen",
-                    name,
-                )
+                path = f"output/{courseName}-screen"
+                m3u8dl.M3u8Download(c["videos"][0]["vga"], path, name)
             if 0 in selected_signal:
-                m3u8dl.M3u8Download(
-                    c["videos"][0]["main"],
-                    "output/" + courseName + "-video",
-                    name,
-                )
+                path = f"output/{courseName}-video"
+                m3u8dl.M3u8Download(c["videos"][0]["main"], path, name)
+            if download_audio:
+                audio_url = utils.get_audio_url(c["video_ids"][0])
+                if audio_url:
+                    print("Downloading audio...")
+                    utils.download_audio(audio_url, path, name)
+                    print("Download audio successfully.")
         except Exception as e:
             print(e)
             fail.append(name)

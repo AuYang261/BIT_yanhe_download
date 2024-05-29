@@ -14,7 +14,17 @@
 
 ![image-20231018204208066](md/README/image-20231018204208066.png)
 
-### 直观的交互方式
+### 网页
+
+双击运行`webui_interface.exe`文件打开网页服务器，按住`ctrl`点击命令行中的地址，或直接在浏览器中输入该地址打开。
+
+![image-20240529174653840](md/README/image-20240529174653840.png)
+
+而后在打开的网页中新建任务即可。
+
+![image-20240529174739174](md/README/image-20240529174739174.png)
+
+### 命令行GUI交互
 
 打开命令行（在`release_downloader.zip`解压的文件夹地址栏中搜索cmd），在命令行中输入`gui.exe`文件运行。直接双击运行可能会有字符对不齐的问题，导致难以识别文字。最好将命令行窗口最大化以免字符显示不全。
 
@@ -28,25 +38,29 @@
 
 按键盘上下键移动光标，按空格选择/取消选择，至少需要选择一个视频。选择完成后按回车确认。若想退出按q键即可。
 
-确认后，选择要下载的信号，可选摄像头（即教室后的摄像头录像）或电脑屏幕（即教室电脑的屏幕信号），同样只要需要选择一个信号。选择完成后按回车确认，开始下载。按`ctrl+c`停止。
+确认后，选择要下载的信号，可选摄像头（即教室后的摄像头录像）或电脑屏幕（即教室电脑的屏幕信号），同样至少需要选择一个信号，选择完成后按回车确认。
 
 ![image-20240413002242979](md/README/image-20240413002242979.png)
 
-下载完成的文件在`output/`目录下以`课程名-video/screen`格式命名的文件夹中。
+
+
+而后选择是否下载教室蓝牙话筒信号，若老师未使用蓝牙话筒则该信号没有声音。选择完成后按回车确认。开始下载。按`ctrl+c`停止。
+
+![image-20240529171709402](md/README/image-20240529171709402.png)
+
+![image-20240529171253980](md/README/image-20240529171253980.png)
+
+下载完成的文件在`output/`目录下以`课程名-video/screen`格式命名的文件夹中。若下载了蓝牙音频则保存在和视频同目录同名的`.aac`文件中。
 
 ![image-20230926124922726](md/README/image-20230926124922726.png)
 
 ### 原始交互方式
 
-双击运行`main.exe`文件，并输入你想下载的课程编号(40524)。输出课程视频列表：
+若使用上述GUI显示有问题，可直接使用原始交互方式。双击运行`main.exe`文件，并输入你想下载的课程编号(40524)。输出课程视频列表：
 
-![image-20240413002857964](md/README/image-20240413002857965.png)
+![image-20240529171540279](md/README/image-20240529171540279.png)
 
-输入想下载的视频编号，用英文逗号(,)分隔，回车。接着输入数字选择下载摄像头信号还是下载屏幕信号，默认为摄像头信号。回车即开始下载：
-
-![image-20240413002857964](md/README/image-20240413002857964.png)
-
-
+输入想下载的视频编号，用英文逗号(,)分隔，回车。接着输入数字选择下载摄像头信号还是下载屏幕信号，默认为摄像头信号。而后选择是否下载蓝牙话筒信号。回车即开始下载。
 
 ## 自动生成字幕
 
@@ -110,6 +124,7 @@ pip install pyinstaller
 # 打包
 pyinstaller -F main.py
 pyinstaller -F gui.py
+pyinstakker -F webui_interface.py --add-data webui:webui
 pyinstaller -F gen_caption.py
 ```
 打包`gen_caption.py`时可能会失败，提示递归过深：
@@ -132,4 +147,4 @@ pyinstaller --clean .\gen_caption.spec
 
 ![image-20240409095831766](md/README/image-20240409095831766.png)
 
-解决方法参考[这个](https://blog.csdn.net/qq_42324086/article/details/118280341)，将项目`hooks`目录下的`hook-whisper.py`和`hook-zhconv.py`文件复制到pyinstaller的hook目录下（通常在`python根目录\Lib\site-packages\PyInstaller\hooks`），。
+解决方法参考[这个](https://blog.csdn.net/qq_42324086/article/details/118280341)，将项目`hooks`目录下的`hook-whisper.py`和`hook-zhconv.py`文件复制到pyinstaller的hook目录下（通常在`python根目录\Lib\site-packages\PyInstaller\hooks`）。

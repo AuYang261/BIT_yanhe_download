@@ -70,9 +70,12 @@ def draw_multi_select(stdscr, messages: list, center_row):
         )
 
 
-def multi_select(stdscr, options, title, subtitle=""):
+def multi_select(stdscr, options, title, subtitle="", checked=None):
     # curses.curs_set(0)  # 隐藏光标
-    checked = [False] * len(options)
+    if checked is None:
+        checked = [False] * len(options)
+    else:
+        checked = [bool(c) for c in checked]
     current_row = 0
     while True:
         draw_menu(stdscr, options, checked, title, subtitle, current_row)
@@ -157,6 +160,7 @@ def config(stdscr):
         ["下载蓝牙音频"],
         "选择是否下载教室蓝牙话筒的音频（如果有的话）：",
         "若教师未使用教室蓝牙话筒则该音频无声音",
+        checked=[True],
     )
 
     stdscr.clear()

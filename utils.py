@@ -95,7 +95,11 @@ def get_audio_url(video_id):
 def download_audio(url, path, name):
     token = getToken()
     url = add_signature_for_url(url, token, *getSignature())
-    print(url)
-    res = requests.get(url, headers=headers)
+    _headers = headers.copy()
+    _headers["Host"] = "cvideo.yanhekt.cn"
+    res = requests.get(url, headers=_headers)
+    while res.status_code != 200:
+        time.sleep(0.1)
+        res = requests.get(url, headers=_headers)
     with open(f"{path}/{name}.aac", "wb") as f:
         f.write(res.content)

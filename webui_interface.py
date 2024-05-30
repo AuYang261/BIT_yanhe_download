@@ -13,6 +13,7 @@ import uuid
 import threading
 import ctypes
 import multiprocessing
+import webbrowser
 
 app = Flask(__name__, static_folder="webui")
 
@@ -84,7 +85,6 @@ def execute_one_download_task_worker(task_dict, father_queue):
     m3u8dl.M3u8Download(url, output, name, progress_callback=executor_progress_callback)
     if task_dict["download_audio"]:
         audio_url = task_dict["audio_url"]
-        print(f"audio url: {audio_url}")
         if audio_url:
             print("Downloading audio...")
             utils.download_audio(audio_url, output, name)
@@ -225,4 +225,5 @@ if __name__ == "__main__":
     multiprocessing.freeze_support()
     t = threading.Thread(target=execute_tasks)
     t.start()
+    webbrowser.open("http://127.0.0.1:5001/")
     app.run(debug=False, host="0.0.0.0", use_reloader=False, port=5001)

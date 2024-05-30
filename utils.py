@@ -2,14 +2,51 @@
 
 import requests
 import m3u8dl
+import time
+from hashlib import md5
 
 
 headers = {
     "Origin": "https://www.yanhekt.cn",
-    "Authorization": "Bearer 6277e60fa9e86fdcdd2411ce86a54f47",
     "xdomain-client": "web_user",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.26",
 }
+magic = "1tJrMwNq3h0yLgx86Rued2J1tFc"
+
+
+def encryptURL(url):
+    url_list = url.split("/")
+    # "a97f12c055a10ee51d60e441e618bfef"
+    url_list.insert(-1, md5((magic + "_100").encode()).hexdigest())
+    return "/".join(url_list)
+
+
+def getSignature():
+    timestamp = str(int(time.time()))
+    signature = md5((magic + "_v1_" + timestamp).encode()).hexdigest()
+    return timestamp, signature
+
+
+def getToken():
+    req = requests.get(
+        "https://cbiz.yanhekt.cn/v1/auth/video/token?id=0", headers=headers
+    )
+    data = req.json()["data"]
+    return data["token"]
+
+
+def add_signature_for_url(url, token, timestamp, signature):
+    url = (
+        url
+        + "?Xvideo_Token="
+        + token
+        + "&Xclient_Timestamp="
+        + timestamp
+        + "&Xclient_Signature="
+        + signature
+        + "&Xclient_Version=v1&Platform=yhkt_user"
+    )
+    return url
 
 
 def get_course_info(courseID):
@@ -56,6 +93,9 @@ def get_audio_url(video_id):
 
 
 def download_audio(url, path, name):
+    token = getToken()
+    url = add_signature_for_url(url, token, *getSignature())
+    print(url)
     res = requests.get(url, headers=headers)
     with open(f"{path}/{name}.aac", "wb") as f:
         f.write(res.content)

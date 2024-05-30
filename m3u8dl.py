@@ -12,7 +12,7 @@ import time
 import signal
 from concurrent.futures import ThreadPoolExecutor
 
-from hashlib import md5
+import utils
 
 
 class ThreadPoolExecutorWithQueueSizeLimit(ThreadPoolExecutor):
@@ -32,8 +32,10 @@ def make_sum():
         yield ts_num
         ts_num += 1
 
+
 def dummy_func(downloaded, total, merge_status):
     return
+
 
 class M3u8Download:
     """
@@ -45,7 +47,14 @@ class M3u8Download:
     """
 
     def __init__(
-        self, url, workDir, name, max_workers=32, num_retries=999, base64_key=None, progress_callback=dummy_func
+        self,
+        url,
+        workDir,
+        name,
+        max_workers=32,
+        num_retries=999,
+        base64_key=None,
+        progress_callback=dummy_func,
     ):
 
         self._url = url
@@ -72,12 +81,10 @@ class M3u8Download:
             "Origin": "https://www.yanhekt.cn",
             "referer": "https://www.yanhekt.cn/",
         }
-        self.magic = "1tJrMwNq3h0yLgx86Rued2J1tFc"
-        self.updateSignature()
-
+        self.timestamp, self.signature = utils.getSignature()
         urllib3.disable_warnings()
 
-        self._url = self.encryptURL(self._url)
+        self._url = utils.encryptURL(self._url)
 
         self.get_m3u8_info(self._url, self._num_retries)
 
@@ -105,53 +112,21 @@ class M3u8Download:
             print(f"Download successfully --> {self._name}")
             self._progress_callback(self._success_sum, self._ts_sum, 2)
 
-    def updateSignature(self):
-        self.timestamp = str(int(time.time()))
-        self.signature = md5(
-            (self.magic + "_v1_" + self.timestamp).encode()
-        ).hexdigest()
-
     def updateSignatureLoop(self):
         while self._success_sum != self._ts_sum:
-            self.updateSignature()
+            self.timestamp, self.signature = utils.getSignature()
             time.sleep(10)
-
-    def encryptURL(self, url):
-        url_list = url.split("/")
-        # "a97f12c055a10ee51d60e441e618bfef"
-        url_list.insert(-1, md5((self.magic + "_100").encode()).hexdigest())
-        return "/".join(url_list)
-
-    def getToken(self):
-        if self._token == None:
-            headers = {
-                "Xdomain-Client": "web_user",
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36 Edg/93.0.961.52",
-                "Origin": "https://www.yanhekt.cn",
-            }
-
-            req = requests.get(
-                "https://cbiz.yanhekt.cn/v1/auth/video/token?id=0", headers=headers
-            )
-            data = req.json()["data"]
-            self._token = data["token"]
-        return self._token
 
     def get_m3u8_info(self, m3u8_url, num_retries):
         """
         获取m3u8信息
         """
 
-        token = self.getToken()
-        url = (
-            m3u8_url
-            + "?Xvideo_Token="
-            + token
-            + "&Xclient_Timestamp="
-            + self.timestamp
-            + "&Xclient_Signature="
-            + self.signature
-            + "&Xclient_Version=v1&Platform=yhkt_user"
+        if not self._token:
+            self._token = utils.getToken()
+        token = self._token
+        url = utils.add_signature_for_url(
+            m3u8_url, token, self.timestamp, self.signature
         )
         try:
             with requests.get(
@@ -217,16 +192,11 @@ class M3u8Download:
         """
         下载 .ts 文件
         """
-        token = self.getToken()
-        ts_url = (
-            ts_url.split("\n")[0]
-            + "?Xvideo_Token="
-            + token
-            + "&Xclient_Timestamp="
-            + self.timestamp
-            + "&Xclient_Signature="
-            + self.signature
-            + "&Xclient_Version=v1&Platform=yhkt_user"
+        if not self._token:
+            self._token = utils.getToken()
+        token = self._token
+        ts_url = utils.add_signature_for_url(
+            ts_url.split("\n")[0], token, self.timestamp, self.signature
         )
         try:
             if not os.path.exists(name):

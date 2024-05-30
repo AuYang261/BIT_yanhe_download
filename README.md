@@ -16,9 +16,7 @@
 
 ### 网页
 
-双击运行`webui_interface.exe`文件打开网页服务器，按住`ctrl`点击命令行中的地址，或直接在浏览器中输入该地址打开。
-
-![image-20240529174653840](md/README/image-20240529174653840.png)
+双击运行`webui_interface.exe`文件打开网页服务器，会自动弹出浏览器网页。
 
 而后在打开的网页中新建任务即可。
 
@@ -124,7 +122,7 @@ pip install pyinstaller
 # 打包
 pyinstaller -F main.py
 pyinstaller -F gui.py
-pyinstakker -F webui_interface.py --add-data webui:webui
+pyinstaller -F webui_interface.py --add-data webui:webui
 pyinstaller -F gen_caption.py
 ```
 打包`gen_caption.py`时可能会失败，提示递归过深：

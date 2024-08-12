@@ -120,12 +120,22 @@ def config(stdscr):
     draw_line(stdscr, f"{url_base}", 1)
 
     # 等待用户输入字符串并显示它
-    courseID = stdscr.getstr()
+    courseID = stdscr.getstr().decode("utf-8")
     if not courseID:
         sys.exit()
-    videoList, courseName, professor = utils.get_course_info(
-        courseID=courseID.decode("utf-8")
-    )
+
+    if not utils.read_auth() or not utils.test_auth(courseID=courseID):
+        stdscr.clear()
+        for i, line in enumerate(utils.auth_prompt()):
+            draw_line(stdscr, line, i)
+        auth = stdscr.getstr().decode("utf-8")
+        utils.write_auth(auth)
+        if not utils.test_auth(courseID=courseID):
+            stdscr.clear()
+            draw_line(stdscr, "身份验证失败", 0)
+            stdscr.getch()
+            sys.exit()
+    videoList, courseName, professor = utils.get_course_info(courseID=courseID)
 
     selected_videos = []
 
@@ -170,6 +180,7 @@ def get_cmd_window_size(stdscr):
     return stdscr.getmaxyx()
 
 
+@utils.print_help
 def main():
     global align
     align = 25

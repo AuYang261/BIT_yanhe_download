@@ -1,4 +1,12 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import (
+    Flask,
+    request,
+    jsonify,
+    send_from_directory,
+    render_template,
+    url_for,
+    redirect,
+)
 import os
 import requests
 import m3u8dl
@@ -134,12 +142,23 @@ def execute_tasks():
 
 @app.route("/")
 def index():
-    return send_from_directory(app.static_folder, "index.html")
+    auth = utils.read_auth()
+    return render_template(
+        "index.html",
+        auth=auth,
+        auth_prompt="" if auth else "。".join(utils.auth_prompt()),
+    )
 
 
 @app.route("/get_course")
 def get_course():
     course_id = request.args.get("course_id")
+    auth = request.args.get("auth")
+    if auth:
+        utils.write_auth(auth)
+    if not utils.test_auth(courseID=course_id):
+        utils.remove_auth()
+        return jsonify({"code": 403, "msg": "。".join(utils.auth_prompt(False))})
     try:
         videoList, courseName, professor = utils.get_course_info(courseID=course_id)
     except:

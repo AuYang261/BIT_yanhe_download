@@ -11,3 +11,4 @@ release_*/
 *.json
 .idea
 .DS_Store
+auth.txt

@@ -16,13 +16,22 @@ headers = {
 }
 
 
+@utils.print_help
 def main():
     if len(sys.argv) == 1:
         courseID = input("输 入 课 程 ID: ")
     else:
         courseID = sys.argv[1]
 
+    if not utils.read_auth() or not utils.test_auth(courseID=courseID):
+        auth = input("。".join(utils.auth_prompt()))
+        utils.write_auth(auth)
+        if not utils.test_auth(courseID=courseID):
+            print("身份验证失败")
+            sys.exit()
     videoList, courseName, professor = utils.get_course_info(courseID=courseID)
+
+    print(f"课 程 名: {courseName}")
 
     for i, c in enumerate(videoList):
         print(f"[{i}]: ", c["title"])
@@ -59,16 +68,4 @@ def main():
 
 
 if __name__ == "__main__":
-    try:
-        main()
-        # cProfile.run('main()', 'output/profile.txt')
-    except Exception as e:
-        print(e)
-        print(
-            "If the problem is still not solved, you can report an issue in https://github.com/AuYang261/BIT_yanhe_download/issues."
-        )
-        print("Or contact with the author xu_jyang@163.com. Thanks for your report!")
-        print(
-            "如果问题仍未解决，您可以在https://github.com/AuYang261/BIT_yanhe_download/issues 中报告问题。"
-        )
-        print("或者联系作者xu_jyang@163.com。感谢您的报告！")
+    main()

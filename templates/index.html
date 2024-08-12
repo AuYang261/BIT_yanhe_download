@@ -24,6 +24,9 @@
         <div class="form-group">
           <label for="courseId">课程ID号:</label>
           <input type="text" id="courseId" name="courseId" class="input-field" />
+          <label for="auth">身份认证码: </label>
+          <p id="auth_prompt">{{ auth_prompt }}</p>
+          <input type="text" id="auth" name="auth" class="input-field" placeholder="{{ auth }}" />
           <button type="button" class="btn" onclick="fetchCourseNumber()">
             获取课程信息
           </button>

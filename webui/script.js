@@ -8,10 +8,14 @@ document.getElementsByClassName("close")[0].onclick = function () {
 
 // Implement the logic to fetch course number and handle form submission
 function fetchCourseNumber() {
-  fetch(`/get_course?course_id=${document.getElementById("courseId").value}`)
+  fetch(`/get_course?course_id=${document.getElementById("courseId").value}&auth=${document.getElementById("auth").value}`)
     .then((response) => response.json())
     .then((data) => {
       console.log(data);
+      if (data.code && data.code == 403) {
+        document.getElementById("auth_prompt").innerHTML = data.msg;
+        alert(data.msg);
+      }
       document.getElementById("courseList").innerHTML = ``;
       document.getElementById("courseName11").innerHTML = `课程名: <b>${data.courseName == "" ? "未知" : data.courseName
         }</b>`;

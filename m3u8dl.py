@@ -132,6 +132,8 @@ class M3u8Download:
             with requests.get(
                 url, timeout=(3, 30), verify=False, headers=self._headers
             ) as res:
+                if res.status_code != 200:
+                    raise Exception(f"Failed to get m3u8 info: {res.status_code}")
                 self._front_url = res.url.split(res.request.path_url)[0]
                 if "EXT-X-STREAM-INF" in res.text:  # 判定为顶级M3U8文件
                     for line in res.text.split("\n"):
@@ -188,7 +190,7 @@ class M3u8Download:
             else:
                 f.write(new_m3u8_str.encode("utf-8"))
 
-    def download_ts(self, ts_url, name, num_retries):
+    def download_ts(self, ts_url_original, name, num_retries):
         """
         下载 .ts 文件
         """
@@ -196,7 +198,7 @@ class M3u8Download:
             self._token = utils.getToken()
         token = self._token
         ts_url = utils.add_signature_for_url(
-            ts_url.split("\n")[0], token, self.timestamp, self.signature
+            ts_url_original.split("\n")[0], token, self.timestamp, self.signature
         )
         try:
             if not os.path.exists(name):
@@ -223,7 +225,7 @@ class M3u8Download:
                         )
                         sys.stdout.flush()
                     else:
-                        self.download_ts(ts_url, name, num_retries - 1)
+                        self.download_ts(ts_url_original, name, num_retries - 1)
             else:
                 self._success_sum += 1
 
@@ -232,7 +234,7 @@ class M3u8Download:
             if os.path.exists(name):
                 os.remove(name)
             if num_retries > 0:
-                self.download_ts(ts_url, name, num_retries - 1)
+                self.download_ts(ts_url_original, name, num_retries - 1)
 
     def download_key(self, key_line, num_retries):
         """

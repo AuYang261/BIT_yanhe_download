@@ -52,7 +52,7 @@ class M3u8Download:
         workDir,
         name,
         max_workers=32,
-        num_retries=999,
+        num_retries=99,
         base64_key=None,
         progress_callback=dummy_func,
     ):

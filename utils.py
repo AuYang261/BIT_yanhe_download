@@ -7,18 +7,19 @@ from hashlib import md5
 import os
 
 
+# 在延河课堂网站的main.js中4937号的O[N(149, 270, 240, 274)]["k"]()函数的返回值
+magic = "1138b69dfef641d9d7ba49137d2d4875"
 headers = {
     "Origin": "https://www.yanhekt.cn",
     "Referer": "https://www.yanhekt.cn/",
     "xdomain-client": "web_user",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.26",
     "Xdomain-Client": "web_user",
-    "Xclient-Signature": "e6e3bf5851b0e4af888cb4bc1938c568",
+    "Xclient-Signature": md5((magic + "_v1_undefined").encode()).hexdigest(),
     "Xclient-Version": "v1",
     "Xclient-Timestamp": str(int(time.time())),
     "Authorization": "",
 }
-magic = "1tJrMwNq3h0yLgx86Rued2J1tFc"
 
 
 def auth_prompt(code=True):
@@ -33,7 +34,7 @@ def auth_prompt(code=True):
 
 def encryptURL(url):
     url_list = url.split("/")
-    # "a97f12c055a10ee51d60e441e618bfef"
+    # "c3d47d7b3aa8caf2983b313cb6cd142f"
     url_list.insert(-1, md5((magic + "_100").encode()).hexdigest())
     return "/".join(url_list)
 

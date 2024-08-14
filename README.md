@@ -150,10 +150,10 @@ pip install -r requirements_whisper.txt -i https://pypi.tuna.tsinghua.edu.cn/sim
 # 若未安装pyinstaller，运行以下命令安装
 pip install pyinstaller
 # 打包
-pyinstaller -F main.py
-pyinstaller -F gui.py
-pyinstaller -F webui_interface.py --add-data webui:webui --add-data templates:templates
-pyinstaller -F gen_caption.py
+pyinstaller -F main.py -i yhkt.ico
+pyinstaller -F gui.py -i yhkt.ico
+pyinstaller -F webui_interface.py --add-data webui:webui --add-data templates:templates -i yhkt.ico
+pyinstaller -F gen_caption.py -i yhkt.ico
 ```
 打包`gen_caption.py`时可能会失败，提示递归过深：
 

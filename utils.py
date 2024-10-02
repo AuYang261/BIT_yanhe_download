@@ -24,7 +24,7 @@ headers = {
 
 def auth_prompt(code=True):
     return [
-        "请先在浏览器登陆延河课堂",
+        "请先在浏览器登录延河课堂",
         "并在延河课堂的地址栏输入 javascript:alert(JSON.parse(localStorage.auth).token)",
         '注意粘贴时浏览器会自动去掉"javascript:"，需要手动补上',
         "或者按F12打开控制台粘贴这段代码",

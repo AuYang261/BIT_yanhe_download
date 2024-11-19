@@ -3,6 +3,7 @@ import time
 from zhconv import convert  # 简繁体转换
 import sys
 import os
+import curses
 
 
 def seconds_to_hmsm(seconds):
@@ -28,6 +29,104 @@ def seconds_to_hmsm(seconds):
     return f"{hours}:{minutes}:{seconds},{milliseconds}"
 
 
+def select_courses_interactive(videoList, title="选择视频文件:"):
+    """使用光标交互式选择视频文件"""
+    def draw_menu(stdscr, current_row, selected):
+        stdscr.clear()
+        h, w = stdscr.getmaxyx()
+        
+        stdscr.addstr(0, 0, title)
+        stdscr.addstr(1, 0, "使用↑↓键移动, 回车选择/取消, y确认, q退出")
+        stdscr.addstr(2, 0, "-" * (w-1))
+        
+        for idx, video in enumerate(videoList):
+            y = idx + 4
+            if y >= h:
+                break
+                
+            mark = "[*]" if idx in selected else "[ ]"
+            text = f"{mark} [{idx}]: {video}"
+            
+            if idx == current_row:
+                stdscr.attron(curses.A_REVERSE)
+                stdscr.addstr(y, 0, text[:w-1])
+                stdscr.attroff(curses.A_REVERSE)
+            else:
+                stdscr.addstr(y, 0, text[:w-1])
+        
+        stdscr.refresh()
+
+    def main(stdscr):
+        curses.curs_set(0)
+        current_row = 0
+        selected = []
+        
+        while True:
+            draw_menu(stdscr, current_row, selected)
+            key = stdscr.getch()
+            
+            if key == curses.KEY_UP and current_row > 0:
+                current_row -= 1
+            elif key == curses.KEY_DOWN and current_row < len(videoList) - 1:
+                current_row += 1
+            elif key == ord('\n'):
+                if current_row in selected:
+                    selected.remove(current_row)
+                else:
+                    selected.append(current_row)
+            elif key == ord('y'):
+                if selected:
+                    return selected
+            elif key == ord('q'):
+                return []
+    
+    return curses.wrapper(main)
+
+
+def select_option_interactive(title, options, default_index=0):
+    """通用的交互式单选菜单"""
+    def draw_menu(stdscr, current_row):
+        stdscr.clear()
+        h, w = stdscr.getmaxyx()
+        
+        stdscr.addstr(0, 0, title)
+        stdscr.addstr(1, 0, "使用↑↓键移动, 回车选择, q退出")
+        stdscr.addstr(2, 0, "-" * (w-1))
+        
+        for idx, option in enumerate(options):
+            y = idx + 4
+            if y >= h:
+                break
+                
+            if idx == current_row:
+                stdscr.attron(curses.A_REVERSE)
+                stdscr.addstr(y, 0, f"[{idx}] {option}")
+                stdscr.attroff(curses.A_REVERSE)
+            else:
+                stdscr.addstr(y, 0, f"[{idx}] {option}")
+        
+        stdscr.refresh()
+
+    def main(stdscr):
+        curses.curs_set(0)
+        current_row = default_index  # 使用传入的默认索引
+        
+        while True:
+            draw_menu(stdscr, current_row)
+            key = stdscr.getch()
+            
+            if key == curses.KEY_UP and current_row > 0:
+                current_row -= 1
+            elif key == curses.KEY_DOWN and current_row < len(options) - 1:
+                current_row += 1
+            elif key == ord('\n'):
+                return current_row
+            elif key == ord('q'):
+                return -1
+    
+    return curses.wrapper(main)
+
+
 def main():
     # 视频文件路径
     video_paths = []
@@ -39,26 +138,23 @@ def main():
             for filename in filenames:
                 if filename.endswith(".mp4"):
                     files.append(os.path.join(dirpath, filename).replace("\\", "/"))
-        for i, f in enumerate(files):
-            print(f"[{i}]: ", f)
-        input_list = eval(
-            "[" + input("select a video file by input a num(split with ','): ") + "]"
-        )
-        for i in input_list:
+        
+        # 使用交互式选择视频文件
+        selected = select_courses_interactive(files, "选择视频文件:")
+        if not selected:
+            return
+        for i in selected:
             video_paths.append(files[i])
-        print("selected video files:", video_paths)
-        models = []
-        for model in whisper.available_models():
-            if ".en" in model:
-                continue
-            print(f"[{len(models)}]: ", model)
-            models.append(model)
-        model_index = input("select a model by input a num(default 'base'): ")
-        try:
-            model_name = models[eval(model_index)]
-        except:
+        
+        # 使用交互式选择模型
+        models = [m for m in whisper.available_models() if ".en" not in m]
+        base_index = models.index("base") if "base" in models else 0
+        model_index = select_option_interactive("选择模型:", models, default_index=base_index)
+        if model_index == -1:
             model_name = "base"
-        print("selected model:", model_name)
+        else:
+            model_name = models[model_index]
+        print("使用模型:", model_name)
 
     for video_path in video_paths:
         audio_path = video_path.replace("mp4", "m4a")

@@ -8,6 +8,7 @@ import os
 import cProfile
 import time
 import utils
+import curses
 
 headers = {
     "Origin": "https://www.yanhekt.cn",
@@ -19,7 +20,7 @@ headers = {
 @utils.print_help
 def main():
     if len(sys.argv) == 1:
-        courseID = input("输 入 课 程 ID: ")
+        courseID = input("输入课程ID: ")
     else:
         courseID = sys.argv[1]
 
@@ -31,19 +32,15 @@ def main():
             sys.exit()
     videoList, courseName, professor = utils.get_course_info(courseID=courseID)
 
-    print(f"课 程 名: {courseName}")
-
-    for i, c in enumerate(videoList):
-        print(f"[{i}]: ", c["title"])
-
-    index = eval(
-        "[" + input("选 择 课 程 编 号 (用 英 文 逗 号 ','分 隔, 例 如: 0,2,4): ") + "]"
+    index = select_courses_interactive(videoList, courseName)
+    vga = select_option_interactive(
+        "选择下载内容:",
+        ["摄像头", "电脑屏幕"]
     )
-    vga = input(
-        "选 择 下 载 摄 像 头 (1) 还 是 电 脑 屏 幕 (2)?(输 入 1 或 2, 默 认 摄 像 头):"
-    )
-    audio = input(
-        "是 否 下 载 教 室 蓝 牙 话 筒 的 音 频 ?若 教 师 未 使 用 蓝 牙 话 筒 则 该 音 频 无 声 音 (输 入 1不 下 载, 默 认 下 载):"
+
+    audio = select_option_interactive(
+        "是否下载教室蓝牙话筒的音频? 若教师未使用蓝牙话筒则该音频无声音:",
+        ["下载", "不下载"]
     )
     if not os.path.exists("output/"):
         os.mkdir("output/")
@@ -65,6 +62,113 @@ def main():
                 print("Downloading audio...")
                 utils.download_audio(audio_url, path, name)
                 print("Download audio successfully.")
+
+
+def select_courses_interactive(videoList, courseName):
+    """使用光标交互式选择课程"""
+    def draw_menu(stdscr, current_row, selected):
+        stdscr.clear()
+        h, w = stdscr.getmaxyx()
+        
+        # 显示课程名和操作说明
+        stdscr.addstr(0, 0, f"课程名: {courseName}")
+        stdscr.addstr(1, 0, "使用↑↓键移动, 回车选择/取消, y确认, q退出")
+        stdscr.addstr(2, 0, "-" * (w-1))
+        
+        # 显示课程列表
+        for idx, course in enumerate(videoList):
+            y = idx + 4  # 从第4行开始显示课程列表
+            if y >= h:
+                break
+                
+            mark = "[*]" if idx in selected else "[ ]"
+            text = f"{mark} [{idx}]: {course['title']}"
+            
+            if idx == current_row:
+                stdscr.attron(curses.A_REVERSE)
+                stdscr.addstr(y, 0, text[:w-1])
+                stdscr.attroff(curses.A_REVERSE)
+            else:
+                stdscr.addstr(y, 0, text[:w-1])
+        
+        stdscr.refresh()
+
+    def main(stdscr):
+        # 设置光标不可见
+        curses.curs_set(0)
+        
+        current_row = 0
+        selected = []
+        
+        while True:
+            draw_menu(stdscr, current_row, selected)
+            
+            # 获取用户输入
+            key = stdscr.getch()
+            
+            if key == curses.KEY_UP and current_row > 0:
+                current_row -= 1
+            elif key == curses.KEY_DOWN and current_row < len(videoList) - 1:
+                current_row += 1
+            elif key == ord('\n'):  # 回车键
+                if current_row in selected:
+                    selected.remove(current_row)
+                else:
+                    selected.append(current_row)
+            elif key == ord('y'):  # y键确认
+                if selected:
+                    return selected
+            elif key == ord('q'):  # q键退出
+                return []
+    
+    # 运行curses程序
+    return curses.wrapper(main)
+
+
+def select_option_interactive(title, options):
+    """通用的交互式单选菜单"""
+    def draw_menu(stdscr, current_row):
+        stdscr.clear()
+        h, w = stdscr.getmaxyx()
+        
+        # 显示标题和操作说明
+        stdscr.addstr(0, 0, title)
+        stdscr.addstr(1, 0, "使用↑↓键移动, 回车选择, q退出")
+        stdscr.addstr(2, 0, "-" * (w-1))
+        
+        # 显示选项
+        for idx, option in enumerate(options):
+            y = idx + 4
+            if y >= h:
+                break
+                
+            if idx == current_row:
+                stdscr.attron(curses.A_REVERSE)
+                stdscr.addstr(y, 0, f"[{idx + 1}] {option}")
+                stdscr.attroff(curses.A_REVERSE)
+            else:
+                stdscr.addstr(y, 0, f"[{idx + 1}] {option}")
+        
+        stdscr.refresh()
+
+    def main(stdscr):
+        curses.curs_set(0)
+        current_row = 0
+        
+        while True:
+            draw_menu(stdscr, current_row)
+            key = stdscr.getch()
+            
+            if key == curses.KEY_UP and current_row > 0:
+                current_row -= 1
+            elif key == curses.KEY_DOWN and current_row < len(options) - 1:
+                current_row += 1
+            elif key == ord('\n'):  # 回车选择
+                return str(current_row + 1)
+            elif key == ord('q'):  # q键选择默认选项
+                return ""
+    
+    return curses.wrapper(main)
 
 
 if __name__ == "__main__":

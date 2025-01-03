@@ -10,7 +10,7 @@
 
 [点击此处下载](https://github.com/AuYang261/BIT_yanhe_download/releases/latest/download/release_downloader.zip)并解压。
 
-在[延河课堂 (yanhekt.cn)](https://www.yanhekt.cn/recordCourse)中找到想下载的课程，以链接为https://www.yanhekt.cn/course/40524 的课程为例，复制地址栏最后的五位编号40524。注意是课程列表的链接（以`yanhekt.cn/course/五位编号`开头），不是视频界面的链接（以`yanhekt.cn/session/六位编号`开头）。
+在[延河课堂 (yanhekt.cn)](https://www.yanhekt.cn/recordCourse)中找到想下载的课程，以链接为https://www.yanhekt.cn/course/40524 的课程为例，复制地址栏最后的五位编号40524。注意是课程列表的链接（以 `yanhekt.cn/course/五位编号`开头），不是视频界面的链接（以 `yanhekt.cn/session/六位编号`开头）。
 
 ![image-20231018204208066](md/README/image-20231018204208066.png)
 
@@ -28,11 +28,11 @@ javascript:alert(JSON.parse(localStorage.auth).token)
 
 ![image-20240809182413373](md/README/image-20240809182413373.png)
 
-或者可以按`F12`键打开”控制台“，在其中输入上述代码，也能得到身份认证码。
+或者可以按 `F12`键打开”控制台“，在其中输入上述代码，也能得到身份认证码。
 
 ### 网页GUI交互
 
-双击运行`webui_interface.exe`文件打开网页服务器，会自动弹出浏览器网页。
+双击运行 `webui_interface.exe`文件打开网页服务器，会自动弹出浏览器网页。
 
 而后在打开的网页中新建任务即可。
 
@@ -48,13 +48,13 @@ javascript:alert(JSON.parse(localStorage.auth).token)
 
 ![image-20240809182420653](md/README/image-20240809182420653.png)
 
-下载完成的文件在`output/`目录下以`课程名-video/screen`格式命名的文件夹中。若下载了蓝牙音频则保存在和视频同目录同名的`.aac`文件中。
+下载完成的文件在 `output/`目录下以 `课程名-video/screen`格式命名的文件夹中。若下载了蓝牙音频则保存在和视频同目录同名的 `.aac`文件中。
 
 ![image-20230926124922726](md/README/image-20230926124922726.png)
 
 ### 命令行GUI交互
 
-打开命令行（在`release_downloader.zip`解压的文件夹地址栏中搜索cmd），在命令行中输入`gui.exe`文件运行。直接双击运行可能会有字符对不齐的问题，导致难以识别文字。最好将命令行窗口最大化以免字符显示不全。
+打开命令行（在 `release_downloader.zip`解压的文件夹地址栏中搜索cmd），在命令行中输入 `gui.exe`文件运行。直接双击运行可能会有字符对不齐的问题，导致难以识别文字。最好将命令行窗口最大化以免字符显示不全。
 
 ![image-20240413001454717](md/README/image-20240413001454717.png)
 
@@ -74,17 +74,13 @@ javascript:alert(JSON.parse(localStorage.auth).token)
 
 ![image-20240413002242979](md/README/image-20240413002242979.png)
 
-
-
-而后选择是否下载教室蓝牙话筒信号，选择完成后按回车确认。开始下载。按`ctrl+c`停止。
+而后选择是否下载教室蓝牙话筒信号，选择完成后按回车确认。开始下载。按 `ctrl+c`停止。
 
 ![image-20240529171253980](md/README/image-20240529171253980.png)
 
-
-
 ### 原始交互方式
 
-若使用上述GUI显示有问题，可直接使用原始交互方式。双击运行`main.exe`文件，并输入你想下载的课程编号(40524)和身份认证码（如果需要）。输出课程视频列表：
+若使用上述GUI显示有问题，可直接使用原始交互方式。双击运行 `main.exe`文件，并输入你想下载的课程编号(40524)和身份认证码（如果需要）。输出课程视频列表：
 
 ![image-20240529171540279](md/README/image-20240529171540279.png)
 
@@ -96,15 +92,15 @@ javascript:alert(JSON.parse(localStorage.auth).token)
 
 最好使用GPU运行，否则速度较慢，依赖见[下文](#依赖)。
 
-下载[字幕生成程序gen_caption](https://github.com/AuYang261/BIT_yanhe_download/releases/latest)，由于程序比较大，采用了分卷压缩发布。全部下载并解压，得到一个`gen_caption.exe`可执行文件，保存在上述`release_downloader.zip`解压的目录中，和保存视频的目录`output/`同级，如下所示：
+下载[字幕生成程序gen_caption](https://github.com/AuYang261/BIT_yanhe_download/releases/tag/v2.0)，由于程序比较大，采用了分卷压缩发布。全部下载并解压，得到一个 `gen_caption.exe`可执行文件，保存在上述 `release_downloader.zip`解压的目录中，和保存视频的目录 `output/`同级，如下所示：
 
 ![image-20240409105228362](md/README/image-20240409105228362.png)
 
-下载完视频后，双击运行`gen_caption.exe`（文件较大，需要等一会），输入数字选择视频，回车。再输入数字选择使用多大的模型，越往下效果越好，但所需时间也越长，默认使用base模型。第一次使用会自动下载模型（几百M），请耐心等待。如下所示：
+下载完视频后，双击运行 `gen_caption.exe`（文件较大，需要等一会），输入数字选择视频，回车。再输入数字选择使用多大的模型，越往下效果越好，但所需时间也越长，默认使用base模型。第一次使用会自动下载模型（几百M），请耐心等待。如下所示：
 
 ![image-20240409131033038](md/README/image-20240409131033038.png)
 
-等待程序运行完成，生成的字幕文件为`.srt`格式，与视频文件在同级目录下，用支持字幕的播放器（如potplayer）打开视频即可看到带字幕的视频。
+等待程序运行完成，生成的字幕文件为 `.srt`格式，与视频文件在同级目录下，用支持字幕的播放器（如potplayer）打开视频即可看到带字幕的视频。
 
 *tips: 语音转文字所需的时间较长，可以先观看视频，字幕生成好了再重新打开视频享受字幕。使用GPU大约需要几分钟，不使用GPU则需要更长时间。*
 
@@ -122,7 +118,6 @@ sudo apt install ffmpeg
 *若想用python环境运行，需安装以下依赖*
 
 * python，[下载](https://www.python.org/ftp/python/3.9.4/python-3.9.4-amd64.exe)并安装
-
 * python第三方库requests。打开命令行，运行如下命令安装：
 
 ```bash
@@ -137,7 +132,7 @@ pip install -r requirements_whisper.txt -i https://pypi.tuna.tsinghua.edu.cn/sim
 
 ## 注意
 
-* 需要关闭本机上的代理，否则会提示类似`check_hostname requires server_hostname`的报错信息。
+* 需要关闭本机上的代理，否则会提示类似 `check_hostname requires server_hostname`的报错信息。
 * 可以下载无权限的课程，只要知道课程链接（中的课程编号）就行。
 
 ## 打包（仅开发者需要）
@@ -155,11 +150,12 @@ pyinstaller -F gui.py -i yhkt.ico
 pyinstaller -F webui_interface.py --add-data webui:webui --add-data templates:templates -i yhkt.ico
 pyinstaller -F gen_caption.py -i yhkt.ico
 ```
-打包`gen_caption.py`时可能会失败，提示递归过深：
+
+打包 `gen_caption.py`时可能会失败，提示递归过深：
 
 <img src="md/README/image-20240409095211597.png" alt="image-20240409095211597" style="zoom:50%;" />
 
-解决方法参考[这里](https://zhuanlan.zhihu.com/p/661325305)，需要修改项目根目录下的`gen_caption.spec`配置文件，在文件开始处加上以下代码：
+解决方法参考[这里](https://zhuanlan.zhihu.com/p/661325305)，需要修改项目根目录下的 `gen_caption.spec`配置文件，在文件开始处加上以下代码：
 
 ```python
 import sys ; sys.setrecursionlimit(sys.getrecursionlimit() * 5)
@@ -175,4 +171,4 @@ pyinstaller --clean .\gen_caption.spec
 
 ![image-20240409095831766](md/README/image-20240409095831766.png)
 
-解决方法参考[这个](https://blog.csdn.net/qq_42324086/article/details/118280341)，将项目`hooks`目录下的`hook-whisper.py`和`hook-zhconv.py`文件复制到pyinstaller的hook目录下（通常在`python根目录\Lib\site-packages\PyInstaller\hooks`）。
+解决方法参考[这个](https://blog.csdn.net/qq_42324086/article/details/118280341)，将项目 `hooks`目录下的 `hook-whisper.py`和 `hook-zhconv.py`文件复制到pyinstaller的hook目录下（通常在 `python根目录\Lib\site-packages\PyInstaller\hooks`）。

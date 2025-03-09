@@ -12,3 +12,4 @@ release_*/
 .idea
 .DS_Store
 auth.txt
+.venv/

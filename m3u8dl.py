@@ -102,7 +102,7 @@ class M3u8Download:
                 pool.submit(
                     self.download_ts,
                     ts_url,
-                    os.path.join(self._file_path, str(k)),
+                    k,
                     self._num_retries,
                 )
         if self._success_sum == self._ts_sum:
@@ -160,8 +160,9 @@ class M3u8Download:
         """
         if not os.path.exists(self._file_path):
             os.mkdir(self._file_path)
-        new_m3u8_str = ""
+        new_m3u8_str = "#EXTM3U\n#EXT-X-VERSION:3\n"  # 确保包含必要的头信息
         ts = make_sum()
+        duration_line = ""
         for line in m3u8_text_str.split("\n"):
             if "#" in line:
                 if "EXT-X-KEY" in line and "URI=" in line:
@@ -171,29 +172,60 @@ class M3u8Download:
                     if key:
                         new_m3u8_str += f"{key}\n"
                         continue
+                # 保存EXTINF行（包含时长信息）
+                if "EXTINF" in line:
+                    duration_line = line
+                    continue
                 new_m3u8_str += f"{line}\n"
                 if "EXT-X-ENDLIST" in line:
                     break
             else:
-                if line.startswith("http"):
-                    self._ts_url_list.append(line)
-                elif line.startswith("/"):
-                    self._ts_url_list.append(self._front_url + line)
-                else:
-                    self._ts_url_list.append(self._url.rsplit("/", 1)[0] + "/" + line)
-                new_m3u8_str += os.path.join(self._file_path, str(next(ts))) + "\n"
+                if line and line.strip():  # 确保行不是空的
+                    if line.startswith("http"):
+                        self._ts_url_list.append(line)
+                    elif line.startswith("/"):
+                        self._ts_url_list.append(self._front_url + line)
+                    else:
+                        self._ts_url_list.append(self._url.rsplit("/", 1)[0] + "/" + line)
+                    
+                    ts_index = next(ts)
+                    if duration_line:
+                        new_m3u8_str += f"{duration_line}\n"  # 添加时长信息行
+                        duration_line = ""
+                    
+                    # 使用.ts扩展名保存文件
+                    ts_file = str(ts_index) + ".ts"
+                    ts_path = os.path.join(self._file_path, ts_file).replace('\\', '/')
+                    # 在m3u8文件中使用相对路径
+                    rel_path = os.path.basename(self._file_path) + "/" + ts_file
+                    new_m3u8_str += f"{rel_path}\n"
+        
         self._ts_sum = next(ts)
-        with open(self._file_path + ".m3u8", "wb") as f:
+        # 确保m3u8文件以EXT-X-ENDLIST结尾
+        if not new_m3u8_str.strip().endswith("EXT-X-ENDLIST"):
+            new_m3u8_str += "#EXT-X-ENDLIST\n"
+            
+        m3u8_file_path = self._file_path + ".m3u8"
+        with open(m3u8_file_path, "wb") as f:
             if platform.system() == "Windows":
                 # f.write(new_m3u8_str.encode('gbk'))
                 f.write(new_m3u8_str.encode("utf-8"))
             else:
                 f.write(new_m3u8_str.encode("utf-8"))
+        
+        print(f"已生成m3u8文件: {m3u8_file_path}")
 
-    def download_ts(self, ts_url_original, name, num_retries):
+    def download_ts(self, ts_url_original, index, num_retries):
         """
         下载 .ts 文件
         """
+        # 确保index是数字，用于文件命名
+        if isinstance(index, str) and index.endswith('.ts'):
+            index = index.rstrip('.ts')
+        
+        # 构建TS文件路径
+        ts_file = os.path.join(self._file_path, f"{index}.ts")
+        
         if not self._token:
             self._token = utils.getToken()
         token = self._token
@@ -201,7 +233,7 @@ class M3u8Download:
             ts_url_original.split("\n")[0], token, self.timestamp, self.signature
         )
         try:
-            if not os.path.exists(name):
+            if not os.path.exists(ts_file):
                 with requests.get(
                     ts_url,
                     stream=True,
@@ -210,7 +242,7 @@ class M3u8Download:
                     headers=self._headers,
                 ) as res:
                     if res.status_code == 200:
-                        with open(name, "wb") as ts:
+                        with open(ts_file, "wb") as ts:
                             for chunk in res.iter_content(chunk_size=1024):
                                 if chunk:
                                     ts.write(chunk)
@@ -225,16 +257,16 @@ class M3u8Download:
                         )
                         sys.stdout.flush()
                     else:
-                        self.download_ts(ts_url_original, name, num_retries - 1)
+                        self.download_ts(ts_url_original, index, num_retries - 1)
             else:
                 self._success_sum += 1
 
             self._progress_callback(self._success_sum, self._ts_sum, 0)
         except Exception as e:
-            if os.path.exists(name):
-                os.remove(name)
+            if os.path.exists(ts_file):
+                os.remove(ts_file)
             if num_retries > 0:
-                self.download_ts(ts_url_original, name, num_retries - 1)
+                self.download_ts(ts_url_original, index, num_retries - 1)
 
     def download_key(self, key_line, num_retries):
         """
@@ -271,10 +303,102 @@ class M3u8Download:
         """
         合并.ts文件，输出mp4格式视频，需要ffmpeg
         """
-        cmd = f'''ffmpeg -allowed_extensions ALL -i "{self._file_path}.m3u8" -acodec \
-        copy -vcodec copy -f mp4 "{self._file_path}.mp4"'''
-        # print(cmd)
-        os.system(cmd)
+        # 检查所有TS文件是否正确
+        self.verify_all_ts_files()
+        
+        # 第一种方法：通过m3u8文件合并
+        print("尝试方法1：通过m3u8文件合并...")
+        cmd = f'''ffmpeg -allowed_extensions ALL -protocol_whitelist "file,http,https,tcp,tls" -i "{self._file_path}.m3u8" -acodec \
+        copy -vcodec copy -bsf:a aac_adtstoasc -f mp4 "{self._file_path}.mp4"'''
+        result = os.system(cmd)
+        
+        # 如果第一种方法失败，尝试第二种方法：直接合并TS文件
+        if result != 0:
+            print("方法1失败，尝试方法2：通过文件列表合并...")
+            # 创建包含所有ts文件的列表文件
+            ts_list_file = f"{self._file_path}_ts_list.txt"
+            with open(ts_list_file, "w") as f:
+                for i in range(self._ts_sum):
+                    ts_file = os.path.join(self._file_path, f"{i}.ts").replace('\\', '/')
+                    if os.path.exists(ts_file):
+                        f.write(f"file '{ts_file}'\n")
+            
+            # 使用ffmpeg的concat方法直接合并
+            concat_cmd = f'''ffmpeg -f concat -safe 0 -i "{ts_list_file}" -c copy "{self._file_path}.mp4"'''
+            result2 = os.system(concat_cmd)
+            
+            # 清理临时文件
+            if os.path.exists(ts_list_file):
+                os.remove(ts_list_file)
+                
+            # 如果第二种方法也失败，尝试第三种方法：直接拼接所有TS文件
+            if result2 != 0:
+                print("方法2失败，尝试方法3：直接拼接TS文件...")
+                # 创建一个临时文件用于存储所有合并的TS内容
+                temp_ts = f"{self._file_path}_temp.ts"
+                with open(temp_ts, "wb") as outfile:
+                    for i in range(self._ts_sum):
+                        ts_file = os.path.join(self._file_path, f"{i}.ts")
+                        if os.path.exists(ts_file):
+                            with open(ts_file, "rb") as infile:
+                                outfile.write(infile.read())
+                
+                # 使用ffmpeg将合并后的TS文件转换为MP4
+                os.system(f'''ffmpeg -i "{temp_ts}" -acodec copy -vcodec copy "{self._file_path}.mp4"''')
+                
+                # 清理临时文件
+                if os.path.exists(temp_ts):
+                    os.remove(temp_ts)
+
+    def verify_all_ts_files(self):
+        """
+        验证所有下载的TS文件
+        """
+        print("验证下载的TS文件完整性...")
+        fixed_count = 0
+        for i in range(self._ts_sum):
+            # 使用新的文件命名方式
+            ts_file = os.path.join(self._file_path, f"{i}.ts")
+            needs_redownload = False
+            
+            # 检查文件是否存在
+            if not os.path.exists(ts_file):
+                print(f"文件 {ts_file} 不存在，将重新下载")
+                needs_redownload = True
+            # 检查文件大小
+            elif os.path.getsize(ts_file) < 100:  # 小于100字节的文件可能是无效的
+                print(f"文件 {ts_file} 大小异常（{os.path.getsize(ts_file)}字节），将重新下载")
+                needs_redownload = True
+            # 检查文件内容
+            else:
+                try:
+                    with open(ts_file, 'rb') as f:
+                        header = f.read(4)
+                        # 有效的TS文件通常以0x47开头
+                        if len(header) > 0 and header[0] != 0x47:
+                            print(f"文件 {ts_file} 内容异常，将重新下载")
+                            needs_redownload = True
+                except Exception as e:
+                    print(f"检查文件 {ts_file} 时出错: {str(e)}，将重新下载")
+                    needs_redownload = True
+            
+            # 重新下载文件（如果需要）
+            if needs_redownload:
+                if i < len(self._ts_url_list):
+                    # 如果文件存在，先删除
+                    if os.path.exists(ts_file):
+                        os.remove(ts_file)
+                    # 重新下载
+                    print(f"正在重新下载片段 {i}...")
+                    self.download_ts(self._ts_url_list[i], i, self._num_retries)
+                    fixed_count += 1
+                else:
+                    print(f"无法重新下载片段 {i}，URL列表中没有对应项")
+        
+        if fixed_count > 0:
+            print(f"共修复了 {fixed_count} 个TS文件")
+        else:
+            print("所有TS文件验证通过")
 
     def delete_file(self):
         file = os.listdir(self._file_path)

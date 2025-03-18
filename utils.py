@@ -1,11 +1,8 @@
-# coding: utf-8
-
-import requests
-import m3u8dl
+import os
 import time
 from hashlib import md5
-import os
 
+import requests
 
 # 在延河课堂网站的main.js中4937号的O[N(149, 270, 240, 274)]["k"]()函数的返回值
 magic = "1138b69dfef641d9d7ba49137d2d4875"
@@ -78,7 +75,7 @@ def add_signature_for_url(url, token, timestamp, signature):
 def read_auth():
     if not os.path.exists("auth.txt"):
         return ""
-    with open("auth.txt", "r") as f:
+    with open("auth.txt") as f:
         auth = f.read().strip()
         headers["Authorization"] = "Bearer " + auth
     return auth

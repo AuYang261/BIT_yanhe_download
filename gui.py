@@ -1,9 +1,8 @@
 import curses
-import utils
-import m3u8dl
-import os
 import sys
-import time
+
+import m3u8dl
+import utils
 
 videoList = []
 courseName = ""
@@ -97,7 +96,13 @@ def multi_select(stdscr, options, title, subtitle="", checked=None):
 
 
 def config(stdscr):
-    global videoList, courseName, professor, selected_videos, selected_signal, download_audio
+    global \
+        videoList, \
+        courseName, \
+        professor, \
+        selected_videos, \
+        selected_signal, \
+        download_audio
 
     height, width = get_cmd_window_size(stdscr)
 

@@ -1,12 +1,7 @@
-# coding=utf-8
-
-import requests
-import m3u8dl
-import sys
-import json
 import os
-import cProfile
-import time
+import sys
+
+import m3u8dl
 import utils
 
 headers = {

@@ -1,27 +1,20 @@
+import multiprocessing
+import threading
+import time
+import uuid
+import webbrowser
+from queue import Empty, Queue
+
 from flask import (
     Flask,
-    request,
     jsonify,
-    send_from_directory,
     render_template,
-    url_for,
-    redirect,
+    request,
+    send_from_directory,
 )
-import os
-import requests
+
 import m3u8dl
-import sys
-import json
-import os
-import cProfile
-import time
 import utils
-from queue import Queue, Empty
-import uuid
-import threading
-import ctypes
-import multiprocessing
-import webbrowser
 
 app = Flask(__name__, static_folder="webui")
 
@@ -85,7 +78,6 @@ def execute_one_download_task_worker(task_dict, father_queue):
     global current_task_uuid, g_father_queue
     print(f"downloading task {task_dict}")
     current_task_uuid = task_dict["uuid"]
-    uuid = task_dict["uuid"]
     url = task_dict["url"]
     output = task_dict["output"]
     name = task_dict["name"]
@@ -108,7 +100,7 @@ def execute_tasks():
             task = task_queue.get(timeout=1)
             task_uuid = task["uuid"]
             task_obj, task_id = find_all_task_by_uuid(task_uuid)
-            if task_obj["canceled"] == True:
+            if task_obj["canceled"] is True:
                 all_task_status.pop(task_id)
                 continue
             process = multiprocessing.Process(
@@ -128,7 +120,7 @@ def execute_tasks():
                     all_task_status[update_id]["tot"] = msg["tot"]
                     all_task_status[update_id]["merge_status"] = msg["merge_status"]
                 except Empty:
-                    if process.is_alive() == False:
+                    if process.is_alive() is False:
                         break
                     time.sleep(0.1)
                     continue
@@ -161,7 +153,7 @@ def get_course():
         return jsonify({"code": 403, "msg": "。".join(utils.auth_prompt(False))})
     try:
         videoList, courseName, professor = utils.get_course_info(courseID=course_id)
-    except:
+    except Exception:
         return jsonify({"videoList": [], "courseName": "", "professor": ""})
     return jsonify(
         {"videoList": videoList, "courseName": courseName, "professor": professor}

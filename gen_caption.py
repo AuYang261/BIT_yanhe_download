@@ -1,8 +1,9 @@
-import whisper
-import time
-from zhconv import convert  # 简繁体转换
-import sys
 import os
+import sys
+import time
+
+import whisper
+from zhconv import convert  # 简繁体转换
 
 
 def seconds_to_hmsm(seconds):
@@ -56,7 +57,7 @@ def main():
         model_index = input("select a model by input a num(default 'base'): ")
         try:
             model_name = models[eval(model_index)]
-        except:
+        except Exception:
             model_name = "base"
         print("selected model:", model_name)
 

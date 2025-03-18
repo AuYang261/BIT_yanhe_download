@@ -1,17 +1,15 @@
-# coding=utf-8
-
-import os
-import re
-import sys
-import queue
 import base64
-import platform
-import requests
-import urllib3
-import time
+import os
+import queue
+import re
 import signal
+import sys
+import time
 from concurrent.futures import ThreadPoolExecutor
 from subprocess import run
+
+import requests
+import urllib3
 
 import utils
 
@@ -57,7 +55,6 @@ class M3u8Download:
         base64_key=None,
         progress_callback=dummy_func,
     ):
-
         self._url = url
         self._token = None
         self._workDir = workDir
@@ -94,9 +91,7 @@ class M3u8Download:
             os._exit(1)
 
         signal.signal(signal.SIGINT, signal_handler)
-        print(
-            "Downloading: %s" % self._name, "Save path: %s" % self._file_path, sep="\n"
-        )
+        print(f"Downloading: {self._name}", f"Save path: {self._file_path}", sep="\n")
         with ThreadPoolExecutorWithQueueSizeLimit(self._max_workers) as pool:
             pool.submit(self.updateSignatureLoop)
             for k, ts_url in enumerate(self._ts_url_list):
@@ -121,7 +116,7 @@ class M3u8Download:
             self.timestamp, self.signature = utils.getSignature()
             time.sleep(10)
 
-    def get_m3u8_info(self, m3u8_url, num_retries):
+    def get_m3u8_info(self, m3u8_url: str, num_retries: int) -> None:
         """
         获取m3u8信息
         """
@@ -158,7 +153,7 @@ class M3u8Download:
             if num_retries > 0:
                 self.get_m3u8_info(m3u8_url, num_retries - 1)
 
-    def get_ts_url(self, m3u8_text_str):
+    def get_ts_url(self, m3u8_text_str: str) -> None:
         """
         获取每一个ts文件的链接
         """
@@ -188,13 +183,9 @@ class M3u8Download:
                 new_m3u8_str += os.path.join(self._file_path, f"{next(ts)}.ts") + "\n"
         self._ts_sum = next(ts)
         with open(self._file_path + ".m3u8", "wb") as f:
-            if platform.system() == "Windows":
-                # f.write(new_m3u8_str.encode('gbk'))
-                f.write(new_m3u8_str.encode("utf-8"))
-            else:
-                f.write(new_m3u8_str.encode("utf-8"))
+            f.write(new_m3u8_str.encode("utf-8"))
 
-    def download_ts(self, ts_url_original, name, num_retries):
+    def download_ts(self, ts_url_original: str, name: str, num_retries: int) -> None:
         """
         下载 .ts 文件
         """
@@ -234,7 +225,7 @@ class M3u8Download:
                 self._success_sum += 1
 
             self._progress_callback(self._success_sum, self._ts_sum, 0)
-        except Exception as e:
+        except Exception:
             if os.path.exists(name):
                 os.remove(name)
             if num_retries > 0:

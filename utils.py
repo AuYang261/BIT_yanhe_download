@@ -1,11 +1,8 @@
-# coding: utf-8
-
-import requests
-import m3u8dl
+import os
 import time
 from hashlib import md5
-import os
 
+import requests
 
 # 在延河课堂网站的main.js中4937号的O[N(149, 270, 240, 274)]["k"]()函数的返回值
 magic = "1138b69dfef641d9d7ba49137d2d4875"
@@ -32,7 +29,7 @@ def auth_prompt(code=True):
     ]
 
 
-def encryptURL(url):
+def encryptURL(url: str) -> str:
     url_list = url.split("/")
     # "c3d47d7b3aa8caf2983b313cb6cd142f"
     url_list.insert(-1, md5((magic + "_100").encode()).hexdigest())
@@ -45,10 +42,11 @@ def getSignature():
     return timestamp, signature
 
 
-def getToken():
+def getToken() -> str:
     req = requests.get(
         "https://cbiz.yanhekt.cn/v1/auth/video/token?id=0", headers=headers
     )
+    # Example response: `{"code":0,"message":"","data":{"token":"12345678901234ab","expired_at":1742300867,"now":1742300267}}`
     data = req.json()["data"]
     if not data:
         read_auth()
@@ -61,7 +59,7 @@ def getToken():
     return data["token"]
 
 
-def add_signature_for_url(url, token, timestamp, signature):
+def add_signature_for_url(url: str, token: str, timestamp: str, signature: str) -> str:
     url = (
         url
         + "?Xvideo_Token="
@@ -78,7 +76,7 @@ def add_signature_for_url(url, token, timestamp, signature):
 def read_auth():
     if not os.path.exists("auth.txt"):
         return ""
-    with open("auth.txt", "r") as f:
+    with open("auth.txt") as f:
         auth = f.read().strip()
         headers["Authorization"] = "Bearer " + auth
     return auth

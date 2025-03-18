@@ -29,7 +29,7 @@ def auth_prompt(code=True):
     ]
 
 
-def encryptURL(url):
+def encryptURL(url: str) -> str:
     url_list = url.split("/")
     # "c3d47d7b3aa8caf2983b313cb6cd142f"
     url_list.insert(-1, md5((magic + "_100").encode()).hexdigest())
@@ -42,10 +42,11 @@ def getSignature():
     return timestamp, signature
 
 
-def getToken():
+def getToken() -> str:
     req = requests.get(
         "https://cbiz.yanhekt.cn/v1/auth/video/token?id=0", headers=headers
     )
+    # Example response: `{"code":0,"message":"","data":{"token":"12345678901234ab","expired_at":1742300867,"now":1742300267}}`
     data = req.json()["data"]
     if not data:
         read_auth()
@@ -58,7 +59,7 @@ def getToken():
     return data["token"]
 
 
-def add_signature_for_url(url, token, timestamp, signature):
+def add_signature_for_url(url: str, token: str, timestamp: str, signature: str) -> str:
     url = (
         url
         + "?Xvideo_Token="

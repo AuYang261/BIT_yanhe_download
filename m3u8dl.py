@@ -1,6 +1,5 @@
 import base64
 import os
-import platform
 import queue
 import re
 import signal
@@ -117,7 +116,7 @@ class M3u8Download:
             self.timestamp, self.signature = utils.getSignature()
             time.sleep(10)
 
-    def get_m3u8_info(self, m3u8_url, num_retries):
+    def get_m3u8_info(self, m3u8_url: str, num_retries: int) -> None:
         """
         获取m3u8信息
         """
@@ -154,7 +153,7 @@ class M3u8Download:
             if num_retries > 0:
                 self.get_m3u8_info(m3u8_url, num_retries - 1)
 
-    def get_ts_url(self, m3u8_text_str):
+    def get_ts_url(self, m3u8_text_str: str) -> None:
         """
         获取每一个ts文件的链接
         """
@@ -184,13 +183,9 @@ class M3u8Download:
                 new_m3u8_str += os.path.join(self._file_path, f"{next(ts)}.ts") + "\n"
         self._ts_sum = next(ts)
         with open(self._file_path + ".m3u8", "wb") as f:
-            if platform.system() == "Windows":
-                # f.write(new_m3u8_str.encode('gbk'))
-                f.write(new_m3u8_str.encode("utf-8"))
-            else:
-                f.write(new_m3u8_str.encode("utf-8"))
+            f.write(new_m3u8_str.encode("utf-8"))
 
-    def download_ts(self, ts_url_original, name, num_retries):
+    def download_ts(self, ts_url_original: str, name: str, num_retries: int) -> None:
         """
         下载 .ts 文件
         """

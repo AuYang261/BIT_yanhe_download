@@ -11,6 +11,7 @@ import urllib3
 import time
 import signal
 from concurrent.futures import ThreadPoolExecutor
+from subprocess import run
 
 import utils
 
@@ -102,7 +103,10 @@ class M3u8Download:
                 pool.submit(
                     self.download_ts,
                     ts_url,
-                    os.path.join(self._file_path, str(k)),
+                    # The `.ts` extension is mandatory for FFmpeg 7.1.1+.
+                    # https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/b753bac08f6881b2d3dea8f1ab84c81550f35897
+                    # https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/6c4e56f07d1a703435854f2156c881885f7798da
+                    os.path.join(self._file_path, f"{k}.ts"),
                     self._num_retries,
                 )
         if self._success_sum == self._ts_sum:
@@ -181,7 +185,7 @@ class M3u8Download:
                     self._ts_url_list.append(self._front_url + line)
                 else:
                     self._ts_url_list.append(self._url.rsplit("/", 1)[0] + "/" + line)
-                new_m3u8_str += os.path.join(self._file_path, str(next(ts))) + "\n"
+                new_m3u8_str += os.path.join(self._file_path, f"{next(ts)}.ts") + "\n"
         self._ts_sum = next(ts)
         with open(self._file_path + ".m3u8", "wb") as f:
             if platform.system() == "Windows":
@@ -267,14 +271,21 @@ class M3u8Download:
             if num_retries > 0:
                 self.download_key(key_line, num_retries - 1)
 
-    def output_mp4(self):
+    def output_mp4(self) -> None:
         """
         合并.ts文件，输出mp4格式视频，需要ffmpeg
         """
-        cmd = f'''ffmpeg -allowed_extensions ALL -i "{self._file_path}.m3u8" -acodec \
-        copy -vcodec copy -f mp4 "{self._file_path}.mp4"'''
-        # print(cmd)
-        os.system(cmd)
+        run(
+            [
+                "ffmpeg",
+                "-i", f"{self._file_path}.m3u8",
+                "-acodec", "copy",
+                "-vcodec", "copy",
+                "-f", "mp4",
+                f"{self._file_path}.mp4",
+            ],
+            check=True,
+        )
 
     def delete_file(self):
         file = os.listdir(self._file_path)
